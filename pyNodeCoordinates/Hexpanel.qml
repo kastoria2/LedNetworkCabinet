@@ -34,7 +34,7 @@ Rectangle {
 
                 Hexagon {
 
-                    outlineColor: "black"
+                    outlineColor: "gray"
                     infillColor: "transparent"
 
                     toScreenScale: widthScale
@@ -59,10 +59,10 @@ Rectangle {
                     return Qt.rgba(red / 256.0, green/256.0, blue/256.0, 1.0);
                 }
 
-                color: rgbToQtColor(modelData[2])
+                color: rgbToQtColor(modelData.finalColor)
 
-                x: (modelData[0] * hexpanel.widthScale) - width/2
-                y: (modelData[1] * hexpanel.widthScale) - height/2
+                x: (modelData.position[0] * hexpanel.widthScale) - width/2
+                y: (modelData.position[1] * hexpanel.widthScale) - height/2
 
                 width: 10
                 height: 10

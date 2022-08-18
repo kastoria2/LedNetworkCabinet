@@ -1,18 +1,40 @@
 import time
 from typing import List
 
+from PySide2.QtCore import QObject, Property, Signal
 
-class LedOut(object):
+
+class LedOut(QObject):
     '''
     Looks something like a Struct to hold parameters to control the
     output of a LED.
     '''
 
-    def __init__(self, index: int, position: List[List[int]]):
-        self.finalColor = 0
+    def __init__(self, parent: QObject=None, index: int=-1, position: List[List[float]]=[0, 0]):
 
-        self.index = index
-        self.position = position
+        QObject.__init__(self, parent)
+
+        self._finalColor = 0
+
+        self._index = index
+        self._position = position
+
+    def setFinalColor(self, value):
+        self._finalColor = value
+        self.finalColorChanged.emit()
+
+    def setIndex(self, value):
+        self._index = value
+        self.indexChanged.emit()
+
+    finalColorChanged = Signal()
+    finalColor = Property("float", fget=lambda self: self._finalColor, fset=setFinalColor, notify=finalColorChanged)
+
+    indexChanged = Signal()
+    index = Property("int", fget=lambda self: self._index, fset=setIndex, notify=indexChanged)
+
+    positionChanged = Signal()
+    position = Property("QVariantList", fget=lambda self: self._position, notify=positionChanged)
 
 
 class InputParams(object):
@@ -49,8 +71,6 @@ class InputParams(object):
 
 GLOBAL_INPUT_PARAMS = InputParams()
 GLOBAL_ANIMATION_METHOD = None
-GLOBAL_LEDS = [LedOut(i, [0, 0]) for i in range(98)]
-
 
 def initAnimation(animationMethod, currentTime_ms: int = None):
 
@@ -66,7 +86,7 @@ def initAnimation(animationMethod, currentTime_ms: int = None):
     GLOBAL_ANIMATION_METHOD = animationMethod
 
 
-def updateAnimation(currentTime_ms: int = None):
+def updateAnimation(ledStrip: List[LedOut], currentTime_ms: int = None):
 
     if currentTime_ms is None:
         currentTime_ms = int(time.time()*1000)
@@ -80,8 +100,7 @@ def updateAnimation(currentTime_ms: int = None):
 
     global GLOBAL_ANIMATION_METHOD
 
-    global GLOBAL_LEDS
-    for led in GLOBAL_LEDS:
+    for led in ledStrip:
         GLOBAL_ANIMATION_METHOD(led, GLOBAL_INPUT_PARAMS)
 
 

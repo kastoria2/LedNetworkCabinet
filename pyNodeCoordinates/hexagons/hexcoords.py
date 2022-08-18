@@ -4,7 +4,7 @@ from .utils import hexagonHeight, rotateVector2d
 from typing import List
 from PySide2.QtCore import QObject, Property, Signal, Slot
 
-from .animations import initAnimation, updateAnimation, static, breath, GLOBAL_LEDS
+from .animations import initAnimation, updateAnimation, static, breath, LedOut
 
 class Hexagon(QObject):
     '''
@@ -97,6 +97,8 @@ class HexPanel(QObject):
                 currentRow.append(self._hexagonAtIndex(col, row))
             self.hexagons.append(currentRow)
 
+        self.ledStrip = self.generateLedStrip()
+
         initAnimation(breath)
 
     @Slot(result=float)
@@ -136,7 +138,7 @@ class HexPanel(QObject):
 
     @Slot()
     def update(self):
-        updateAnimation()
+        updateAnimation(self.ledStrip)
         self.ledsChanged.emit()
 
     def getBounds(self):
@@ -187,11 +189,54 @@ class HexPanel(QObject):
                 ledLocations = self.hexagonAtIndex(col, row).getLedVertices()
                 result.extend(filter(lambda x: inBoundsExclusive(x, bounds[0], bounds[1]), ledLocations))
 
-        global GLOBAL_LEDS
-        for pos in result:
-            pos.append(GLOBAL_LEDS[0].finalColor)
+        return result
+
+    def generateLedStrip(self) -> List[LedOut]:
+        '''
+        Generates a list of LedOut objects that are 0-index matched
+        to LEDs on a physical strip that 'snakes' across rows
+        in the logical model.
+        '''
+
+        ledVertices = self.getLedVertices()
+
+        # Sort the LEDs by Y coordinate into rows
+        ledVertices.sort(key=lambda l: l[1])
+
+        minY = min([vert[1] for vert in ledVertices])
+
+        rows = []
+        for vert in ledVertices:
+            rowIndex = round((vert[1] - minY) / (hexagonHeight(self.radius_mm) / 2))
+
+            # Ensure there are indices to store into.
+            while len(rows) <= rowIndex:
+                rows.append([])
+
+            rows[rowIndex].append(LedOut(None, -1, vert[:2]))
+
+        # Sort the rows by X value alternating decreasing and increasing.
+        for i in range(len(rows)):
+            rows[i].sort(key=lambda lo: lo._position[0], reverse=(i % 2) == 0)
+
+        # Flatten the results.
+        result = []
+        for row in rows:
+            result.extend(row)
+
+        # Assign indicies to the LED.
+        for i in range(len(result)):
+            result[i]._index = i
 
         return result
 
+    def getLedStrip(self) -> List[LedOut]:
+        # print(len(self.ledStrip))
+        return self.ledStrip
+
+
+    ledVerticesChanged = Signal()
+    ledVertices = Property("QVariantList", getLedVertices, notify=ledVerticesChanged)
+
     ledsChanged = Signal()
-    leds = Property("QVariantList", getLedVertices, notify=ledsChanged)
+    leds = Property("QVariantList", getLedStrip, notify=ledsChanged)
