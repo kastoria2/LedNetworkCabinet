@@ -7,7 +7,7 @@ class utils_tests(unittest.TestCase):
     
     def test_hexagonHeight(self):
         
-        radius = 100
+        radius = 50
         self.assertAlmostEqual(hexagonHeight(radius), 86.60254325688783)
 
     def test_rotateVector2d(self):

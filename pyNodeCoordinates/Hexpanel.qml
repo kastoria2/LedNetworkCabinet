@@ -25,8 +25,11 @@ Rectangle {
                 color: "black"
                 radius: hexpanel.hexagonPanelModel.radius() * widthScale
 
-                x: ((index * hexpanel.hexagonPanelModel.radius() * 3) * widthScale) + ((rowIndex+1)%2)*(hexpanel.hexagonPanelModel.radius() * 1.5)*widthScale
-                y: (rowIndex * height/2)
+                toScreenScale: widthScale
+                hexagonModel: hexagonPanelModel.hexagonAtIndex(index, rowIndex)
+
+                //x: ((index * hexpanel.hexagonPanelModel.radius() * 3) * widthScale) + ((rowIndex+1)%2)*(hexpanel.hexagonPanelModel.radius() * 1.5)*widthScale
+                //y: (rowIndex * height/2)
             }
         }
     }

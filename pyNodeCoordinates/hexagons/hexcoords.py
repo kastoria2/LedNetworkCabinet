@@ -27,6 +27,10 @@ class Hexagon(QObject):
     def getRadius(self):
         return self.radius
 
+    @Slot(result=float)
+    def getHeight(self):
+        return self.radius * 2 * (1/1.1547005)
+
     def vertices(self) -> list[list[float]]:
         '''
         Returns the vertices that comprise the hexagon.  Each vertex is a
@@ -81,10 +85,10 @@ class HexPanel(QObject):
 
     @Slot(result=int)
     def rows(self):
-        return self.height_mm / (hexagonHeight(self.radius_mm) * 2) * 2
+        return self.height_mm / ((hexagonHeight(self.radius_mm) ))
 
     @Slot(int, int, result=Hexagon)
     def hexagonAtIndex(self, column, row):
-        x = (column * self.radius_mm * 3) + ((column+1)%2) * self.radius_mm * 1.5
+        x = (column * self.radius_mm * 3) + ((row+1)%2) * self.radius_mm * 1.5
         y = row * hexagonHeight(self.radius_mm) / 2
         return Hexagon(self, x, y, self.radius_mm)

@@ -7,4 +7,4 @@ def rotateVector2d(vec:list[float], radians) -> list[float]:
     ]
 
 def hexagonHeight(radius_mm):
-    return radius_mm * (1 / 1.1547005)
+    return radius_mm * 2 * (1 / 1.1547005)
