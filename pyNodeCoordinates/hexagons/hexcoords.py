@@ -4,7 +4,7 @@ from .utils import hexagonHeight, rotateVector2d
 from typing import List
 from PySide2.QtCore import QObject, Property, Signal, Slot
 
-from .animations import initAnimation, updateAnimation, static
+from .animations import initAnimation, updateAnimation, static, breath, GLOBAL_LEDS
 
 class Hexagon(QObject):
     '''
@@ -95,7 +95,7 @@ class HexPanel(QObject):
                 currentRow.append(self._hexagonAtIndex(col, row))
             self.hexagons.append(currentRow)
 
-        initAnimation(static)
+        initAnimation(breath)
 
     @Slot(result=float)
     def width(self):
@@ -135,6 +135,8 @@ class HexPanel(QObject):
     @Slot()
     def update(self):
         updateAnimation()
+        self.ledsChanged.emit()
+
 
     def getBounds(self):
         topLefts = [
@@ -166,7 +168,7 @@ class HexPanel(QObject):
             ]
         ]
 
-    @Slot(result=list[Hexagon])
+    @Slot(result="QVariantList")
     def getLedVertices(self) -> List[Hexagon]:
 
         result = []
@@ -183,6 +185,10 @@ class HexPanel(QObject):
             for col in range(0, self.columns()):
                 ledLocations = self.hexagonAtIndex(col, row).getLedVertices()
                 result.extend(filter(lambda x: inBoundsExclusive(x, bounds[0], bounds[1]), ledLocations))
+
+        global GLOBAL_LEDS
+        for pos in result:
+            pos.append(GLOBAL_LEDS[0].finalColor)
 
         return result
 

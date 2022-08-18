@@ -42,7 +42,7 @@ class InputParams(object):
         # Some generic indicator of the speed for the anmitaion.
         # e.g. 'breath' could be faster or slower based on this
         # value.  Sin waves could adjust period based on this.
-        self.speed = 128
+        self.speed = 256
 
 
 GLOBAL_INPUT_PARAMS = InputParams()
@@ -52,12 +52,12 @@ GLOBAL_LEDS = [LedOut(i, [0,0]) for i in range(98)]
 def initAnimation(animationMethod, currentTime_ms:int = None):
 
     if currentTime_ms is None:
-        currentTime_ms = int(round(time.time())*1000)
+        currentTime_ms = int(time.time()*1000)
 
     global GLOBAL_INPUT_PARAMS
     GLOBAL_INPUT_PARAMS.reset(currentTime_ms)
 
-    GLOBAL_INPUT_PARAMS.baseColor = 0xff0000
+    GLOBAL_INPUT_PARAMS.baseColor = 0xff00ff
 
     global GLOBAL_ANIMATION_METHOD
     GLOBAL_ANIMATION_METHOD = animationMethod
@@ -65,11 +65,13 @@ def initAnimation(animationMethod, currentTime_ms:int = None):
 def updateAnimation(currentTime_ms:int = None):
     
     if currentTime_ms is None:
-        currentTime_ms = int(round(time.time())*1000)
+        currentTime_ms = int(time.time()*1000)
     
+    #print(f"currentTime_ms: {currentTime_ms}")
+
     global GLOBAL_INPUT_PARAMS
 
-    GLOBAL_INPUT_PARAMS.deltaTime_ms = GLOBAL_INPUT_PARAMS.currentTime_ms - currentTime_ms
+    GLOBAL_INPUT_PARAMS.deltaTime_ms = currentTime_ms - GLOBAL_INPUT_PARAMS.currentTime_ms
     GLOBAL_INPUT_PARAMS.currentTime_ms = currentTime_ms
 
     global GLOBAL_ANIMATION_METHOD
@@ -82,7 +84,7 @@ def static(ledOut:LedOut, inputParams:InputParams):
     '''
     'Animation' that just displays a single, static color.
     '''
-    ledOut.finalColor = inputParams.baaseColor
+    ledOut.finalColor = inputParams.baseColor
 
 def breath(ledOut:LedOut, inputParams:InputParams):
     
@@ -91,18 +93,20 @@ def breath(ledOut:LedOut, inputParams:InputParams):
     CYCLE_PERIOD = 5000
 
     # Max period is 5s for a breath cycle.
-    period = CYCLE_PERIOD * (inputParams.speed / 256.0)
+    period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
     
-    cycleTime = (inputParams.currentTime - inputParams.startTime) % period
+    cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
 
-    absPercentage = abs((period/2.0) - cycleTime) / period
+    absPercentage = (abs((period/2.0) - cycleTime) / period) * 2
 
     red = (inputParams.baseColor & 0xff0000) >> 16
     green = (inputParams.baseColor & 0x00ff00) >> 8
     blue = inputParams.baseColor & 0x0000ff
 
+    #print(f"period: {period}, cycleTime: {cycleTime}, absPercentage: {absPercentage}, red: {red}, green: {green}, blue: {blue}")
+
     red = int(red * absPercentage)
     green = int(green * absPercentage)
     blue = int(blue * absPercentage)
 
-    ledOut.finalColor = red << 16 + green << 8 + blue
+    ledOut.finalColor = (red << 16) + (green << 8) + blue

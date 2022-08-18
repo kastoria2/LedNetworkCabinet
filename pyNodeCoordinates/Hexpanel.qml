@@ -48,7 +48,18 @@ Rectangle {
             model: hexpanel.hexagonPanelModel.leds
 
             Rectangle {
-                color: "red"
+                function rgbToQtColor(rgb) {
+
+                    var red = (rgb & 0xff0000) >> 16;
+                    var green = (rgb & 0x00ff00) >> 8;
+                    var blue = rgb & 0x0000ff;
+
+                    // console.debug(`rgb: ${rgb}, red: ${red}, green: ${green}, blue: ${blue}`);
+
+                    return Qt.rgba(red / 256.0, green/256.0, blue/256.0, 1.0);
+                }
+
+                color: rgbToQtColor(modelData[2])
 
                 x: (modelData[0] * hexpanel.widthScale) - width/2
                 y: (modelData[1] * hexpanel.widthScale) - height/2
@@ -60,4 +71,23 @@ Rectangle {
             }
         }
     }
+
+    Timer {
+        interval: 100
+
+        running: true
+        repeat: true
+
+        onTriggered: {
+            hexagonPanelModel.update();
+        }
+    }
+
+    Connections {
+        target: hexagonPanelModel
+        function onLedsChanged() {
+            // console.debug("leds changed.");
+        }
+    }
+
 }
