@@ -27,6 +27,8 @@ Window {
         {
             width: parent.width
             height: parent.height
+
+            hexagonPanelModel: GlobalHexagonPanelModel
         }
     }
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.15.1, 2022-07-31T14:56:55. -->
+<!-- Written by QtCreator 4.15.1, 2022-08-01T10:08:08. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -251,6 +251,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">/Users/kastoria/Google Drive/dev/hobby/AVR/arduino/hexagon_panel/pyNodeCoordinates/PyHexagon.py</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration./Users/kastoria/Google Drive/dev/hobby/AVR/arduino/hexagon_panel/pyNodeCoordinates/PyHexagon.py</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">/Users/kastoria/Google Drive/dev/hobby/AVR/arduino/hexagon_panel/pyNodeCoordinates/PyHexagon.py</value>
+    <value type="QString" key="PythonEditor.RunConfiguation.Interpreter">{8cb28676-1fbc-4c6d-8c34-b923f31d6c17}</value>
     <value type="QString" key="PythonEditor.RunConfiguation.Script">/Users/kastoria/Google Drive/dev/hobby/AVR/arduino/hexagon_panel/pyNodeCoordinates/PyHexagon.py</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>

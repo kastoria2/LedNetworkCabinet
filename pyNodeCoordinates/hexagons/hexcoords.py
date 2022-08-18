@@ -17,12 +17,12 @@ class Hexagon(QObject):
 
     def vertices(self) -> list[list[float]]:
         '''
-        Returns the vertices that comprise the hexagon.  Each vertex is a 
+        Returns the vertices that comprise the hexagon.  Each vertex is a
         list of [x,y].
         You get a list of 6 of those vertices.
         '''
         p0 = [self.radius, 0.0]
-        
+
         points = []
         for i in range(6):
             hexagonSpace = rotateVector2d(p0, i * math.pi/3)
@@ -31,12 +31,18 @@ class Hexagon(QObject):
 
         return points
 
-class HexPanel(object):
+class HexPanel(QObject):
     '''
     Represents a physical hexagon panel.
     '''
 
-    def __init__(self, width_mm:float, height_mm:float, radius_mm:float):
+    def __init__(self, 
+        parent:QObject=None,
+        width_mm:float=1000,
+        height_mm:float=1000,
+        radius_mm:float=50):
+
+        QObject.__init__(self, parent)
         self.width_mm = width_mm
         self.height_mm = height_mm
         self.radius_mm = radius_mm

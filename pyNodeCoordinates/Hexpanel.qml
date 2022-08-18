@@ -15,6 +15,8 @@ Rectangle {
     property double columns: physicalWidth / (hexagonRadius * 2)
     property double rows: physicalHeight / (hexagonRadius * 2) * 2
 
+    property HexagonPanelModel hexagonPanelModel
+
     color: "light gray"
 
     Repeater {
