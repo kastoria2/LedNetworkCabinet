@@ -248,6 +248,21 @@ class HexPanel(QObject):
         # print(len(self.ledStrip))
         return self.ledStrip
 
+    @Slot(result=str)
+    def generateFirmwareDefinitions(self) -> str:
+
+        buffer = [f"#define NUM_LEDS {len(self.ledStrip)}"]
+        buffer.append("LedOut leds[NUM_LEDS] = {")
+
+        for i in range(len(self.ledStrip)):
+            led = self.ledStrip[i]
+
+            buffer.append(f"LedOut {{{i}, {{{um2mm(led.position_um[0])},{um2mm(led.position_um[1])}}}, NeoPixels::Color(0,0,0)}},")
+
+        buffer.append("};")
+
+        return "\n".join(buffer)
+
     ledVerticesChanged = Signal()
     ledVertices = Property("QVariantList", getLedVertices, notify=ledVerticesChanged)
 
