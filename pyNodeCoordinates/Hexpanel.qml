@@ -61,8 +61,8 @@ Rectangle {
 
                 color: rgbToQtColor(modelData.finalColor)
 
-                x: (modelData.position[0] * hexpanel.widthScale) - width/2
-                y: (modelData.position[1] * hexpanel.widthScale) - height/2
+                x: (modelData.position_um[0]/1000 * hexpanel.widthScale) - width/2
+                y: (modelData.position_um[1]/1000 * hexpanel.widthScale) - height/2
 
                 width: 10
                 height: 10

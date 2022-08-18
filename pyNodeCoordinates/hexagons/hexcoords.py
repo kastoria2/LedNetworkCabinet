@@ -1,6 +1,8 @@
 import math
 
-from .utils import hexagonHeight, rotateVector2d
+from .utils import \
+    hexagonHeight, rotateVector2d, \
+    um2mm, mm2um
 from typing import List
 from PySide2.QtCore import QObject, Property, Signal, Slot
 
@@ -106,7 +108,7 @@ class HexPanel(QObject):
 
         self.ledStrip = self.generateLedStrip()
 
-        initAnimation(indexBreath)
+        initAnimation(radiate)
 
     @Slot(result=float)
     def width(self):
@@ -209,16 +211,17 @@ class HexPanel(QObject):
         in the logical model.
         '''
 
-        ledVertices = self.getLedVertices()
+        ledVertices_um = [[mm2um(v[0]), mm2um(v[1])]
+                          for v in self.getLedVertices()]
 
         # Sort the LEDs by Y coordinate into rows
-        ledVertices.sort(key=lambda l: l[1])
+        ledVertices_um.sort(key=lambda l: l[1])
 
-        minY = min([vert[1] for vert in ledVertices])
+        minY = min([vert[1] for vert in ledVertices_um])
 
         rows = []
-        for vert in ledVertices:
-            rowIndex = round((vert[1] - minY) / (hexagonHeight(self.radius_mm) / 2))
+        for vert in ledVertices_um:
+            rowIndex = round((vert[1] - minY) / (hexagonHeight(mm2um(self.radius_mm)) / 2))
 
             # Ensure there are indices to store into.
             while len(rows) <= rowIndex:
@@ -228,7 +231,7 @@ class HexPanel(QObject):
 
         # Sort the rows by X value alternating decreasing and increasing.
         for i in range(len(rows)):
-            rows[i].sort(key=lambda lo: lo._position[0], reverse=((i+1) % 2) == 0)
+            rows[i].sort(key=lambda lo: lo._position_um[0], reverse=((i+1) % 2) == 0)
 
         # Flatten the results.
         result = []

@@ -4,21 +4,25 @@ from typing import List
 
 from PySide2.QtCore import QObject, Property, Signal
 
+from .utils import mm2um
 
 class LedOut(QObject):
     '''
-    Looks something like a Struct to hold parameters to control the
+    Looks something like a C 'struct' to hold parameters to control the
     output of a LED.
     '''
 
-    def __init__(self, parent: QObject=None, index: int=-1, position: List[List[float]]=[0, 0]):
+    def __init__(
+            self, parent: QObject = None,
+            index: int = -1,
+            position_um: List[List[float]] = [0, 0]):
 
         QObject.__init__(self, parent)
 
         self._finalColor = 0
 
         self._index = index
-        self._position = position
+        self._position_um = position_um
 
     def setFinalColor(self, value):
         self._finalColor = value
@@ -29,13 +33,24 @@ class LedOut(QObject):
         self.indexChanged.emit()
 
     finalColorChanged = Signal()
-    finalColor = Property("float", fget=lambda self: self._finalColor, fset=setFinalColor, notify=finalColorChanged)
+    finalColor = Property(
+        "float",
+        fget=lambda self: self._finalColor,
+        fset=setFinalColor,
+        notify=finalColorChanged)
 
     indexChanged = Signal()
-    index = Property("int", fget=lambda self: self._index, fset=setIndex, notify=indexChanged)
+    index = Property(
+        "int",
+        fget=lambda self: self._index,
+        fset=setIndex,
+        notify=indexChanged)
 
     positionChanged = Signal()
-    position = Property("QVariantList", fget=lambda self: self._position, notify=positionChanged)
+    position_um = Property(
+        "QVariantList",
+        fget=lambda self: self._position_um,
+        notify=positionChanged)
 
 
 class InputParams(object):
@@ -65,7 +80,7 @@ class InputParams(object):
         self.accentColor = 0
 
         # Generic location.  Useful for generating waves or gradients
-        self.baseLocation = [0, 0]
+        self.baseLocation_um = [0, 0]
 
         # Some generic indicator of the speed for the anmitaion.
         # e.g. 'breath' could be faster or slower based on this
@@ -76,6 +91,7 @@ class InputParams(object):
 GLOBAL_INPUT_PARAMS = InputParams()
 GLOBAL_ANIMATION_METHOD = None
 
+
 def initAnimation(animationMethod, currentTime_ms: int = None):
 
     if currentTime_ms is None:
@@ -85,7 +101,7 @@ def initAnimation(animationMethod, currentTime_ms: int = None):
     GLOBAL_INPUT_PARAMS.reset(currentTime_ms)
 
     GLOBAL_INPUT_PARAMS.baseColor = 0xff00ff
-    GLOBAL_INPUT_PARAMS.baseLocation = [625/2.0, 732/2.0]
+    GLOBAL_INPUT_PARAMS.baseLocation_um = [mm2um(625) / 2, mm2um(732) / 2]
 
     global GLOBAL_ANIMATION_METHOD
     GLOBAL_ANIMATION_METHOD = animationMethod
@@ -172,6 +188,7 @@ def clamp(value, lower, upper):
 
     return value
 
+
 def radiate(ledOut: LedOut, inputParams: InputParams):
     CYCLE_PERIOD = 5000
 
@@ -179,8 +196,8 @@ def radiate(ledOut: LedOut, inputParams: InputParams):
     cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
     absPercentage = (cycleTime / period)
 
-    maxDist = distance([0, 0], [625, 736])
-    ledDist = distance(inputParams.baseLocation, ledOut.position)
+    maxDist = distance([0, 0], [mm2um(625), mm2um(736)])
+    ledDist = distance(inputParams.baseLocation_um, ledOut.position_um)
     ledPercent = ledDist / maxDist
 
     red = (inputParams.baseColor & 0xff0000) >> 16
