@@ -7,12 +7,18 @@ from PySide2.QtCore import QObject, Property, Signal, Slot
 from .animations import initAnimation, updateAnimation, LedOut
 from .animations import static, breath, indexBreath, radiate
 
+
 class Hexagon(QObject):
     '''
     A hexagon at a given spatial coordinate.
     '''
 
-    def __init__(self, parent:QObject=None, x:float=0, y:float=0, radius:float=1):
+    def __init__(
+            self,
+            parent: QObject = None,
+            x: float = 0,
+            y: float = 0,
+            radius: float = 1):
         QObject.__init__(self, parent)
 
         self.x = x
@@ -70,12 +76,12 @@ class Hexagon(QObject):
 
 class HexPanel(QObject):
     '''
-    Represents a physical hexagon panel.  Coordinate space is thought of as
-    [0,0] at top left, [width,hegiht] is bottom right.  Similar to raster space.
-    The hexagons are centered on the points.  So hex at index [0][0] could be at
-    position [0,0].  This means that the vectices around that could be negative
-    because the upper left vect will be "above and left" of the center (0,0) of
-    the hexagon.
+    Represents a physical hexagon panel.  Coordinate space is thought
+    of as [0,0] at top left, [width,hegiht] is bottom right.  Similar
+    to raster space. The hexagons are centered on the points.  So hex
+    at index [0][0] could be at position [0,0].  This means that the
+    vectices around that could be negative because the upper left vect
+    will be "above and left" of the center (0,0) of the hexagon.
     '''
 
     def __init__(
@@ -188,7 +194,11 @@ class HexPanel(QObject):
         for row in range(0, self.rows()):
             for col in range(0, self.columns()):
                 ledLocations = self.hexagonAtIndex(col, row).getLedVertices()
-                result.extend(filter(lambda x: inBoundsExclusive(x, bounds[0], bounds[1]), ledLocations))
+                result.extend(
+                    filter(
+                        lambda x:
+                            inBoundsExclusive(x, bounds[0], bounds[1]),
+                        ledLocations))
 
         return result
 
@@ -234,7 +244,6 @@ class HexPanel(QObject):
     def getLedStrip(self) -> List[LedOut]:
         # print(len(self.ledStrip))
         return self.ledStrip
-
 
     ledVerticesChanged = Signal()
     ledVertices = Property("QVariantList", getLedVertices, notify=ledVerticesChanged)
