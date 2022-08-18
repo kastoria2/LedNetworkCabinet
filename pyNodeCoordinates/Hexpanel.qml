@@ -22,14 +22,12 @@ Rectangle {
             property int rowIndex: index
 
             Hexagon {
-                color: "black"
-                radius: hexpanel.hexagonPanelModel.radius() * widthScale
+
+                outlineColor: "black"
+                infillColor: "light blue"
 
                 toScreenScale: widthScale
                 hexagonModel: hexagonPanelModel.hexagonAtIndex(index, rowIndex)
-
-                //x: ((index * hexpanel.hexagonPanelModel.radius() * 3) * widthScale) + ((rowIndex+1)%2)*(hexpanel.hexagonPanelModel.radius() * 1.5)*widthScale
-                //y: (rowIndex * height/2)
             }
         }
     }

@@ -28,6 +28,10 @@ class Hexagon(QObject):
         return self.radius
 
     @Slot(result=float)
+    def getDiameter(self):
+        return self.radius * 2
+
+    @Slot(result=float)
     def getHeight(self):
         return self.radius * 2 * (1/1.1547005)
 
