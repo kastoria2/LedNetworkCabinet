@@ -1,7 +1,7 @@
 import math
 
 from .utils import hexagonHeight, rotateVector2d
-from PySide2.QtCore import QObject
+from PySide2.QtCore import QObject, Property, Signal, Slot
 
 class Hexagon(QObject):
     '''
@@ -47,15 +47,31 @@ class HexPanel(QObject):
         self.height_mm = height_mm
         self.radius_mm = radius_mm
 
+    @Slot(result=float)
+    def width(self):
+        return self.width_mm
+
+    @Slot(result=float)
+    def height(self):
+        return self.height_mm
+
+    @Slot(result=float)
+    def radius(self):
+        return self.radius_mm
+
+    @Slot(result=float)
     def diameter(self):
         return self.radius_mm * 2
 
+    @Slot(result=int)
     def columns(self):
-        return self.width_mm / self.diameter()
+        return self.width_mm / (self.diameter() + self.radius())
 
+    @Slot(result=int)
     def rows(self):
-        return self.height_mm / (hexagonHeight(self.radius_mm) * 2)
+        return self.height_mm / (hexagonHeight(self.radius_mm) * 2) * 2
 
+    @Slot(int, int, result=Hexagon)
     def hexagonAtIndex(self, column, row):
         x = (column * self.radius_mm * 3) + (column+1)%2 * self.radius_mm * 1.5
         y = row * hexagonHeight(self.radius_mm) / 2

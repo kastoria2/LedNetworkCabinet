@@ -4,36 +4,28 @@ import com.fathom.hexagonpanel 1.0
 Rectangle {
     id: hexpanel
 
-    property double physicalWidth: (100*4) + (50 * 4.5)
-    property double physicalHeight: (86.6 * 8) + (86.6)
-
-    property double hexagonRadius: 50
-
-    property double widthScale: width / physicalWidth
-    property double heightScale: height / physicalHeight
-
-    property double columns: physicalWidth / (hexagonRadius * 2)
-    property double rows: physicalHeight / (hexagonRadius * 2) * 2
-
     property HexagonPanelModel hexagonPanelModel
+
+    property double widthScale: width / hexagonPanelModel.width()
+    property double heightScale: height / hexagonPanelModel.height()
 
     color: "light gray"
 
     Repeater {
         id: rowRepeater
-        model: rows
+        model: hexpanel.hexagonPanelModel.rows()
 
         Repeater {
             id: columnRepater
-            model: columns
+            model: hexpanel.hexagonPanelModel.columns()
 
             property int rowIndex: index
 
             Hexagon {
                 color: "black"
-                radius: hexpanel.hexagonRadius * widthScale
+                radius: hexpanel.hexagonPanelModel.radius() * widthScale
 
-                x: ((index * hexpanel.hexagonRadius * 3) * widthScale) + ((rowIndex+1)%2)*(hexpanel.hexagonRadius * 1.5)*widthScale
+                x: ((index * hexpanel.hexagonPanelModel.radius() * 3) * widthScale) + ((rowIndex+1)%2)*(hexpanel.hexagonPanelModel.radius() * 1.5)*widthScale
                 y: (rowIndex * height/2)
             }
         }
