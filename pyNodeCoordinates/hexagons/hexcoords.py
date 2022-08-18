@@ -4,7 +4,7 @@ from .utils import hexagonHeight, rotateVector2d
 from typing import List
 from PySide2.QtCore import QObject, Property, Signal, Slot
 
-from .animations import initAnimation, updateAnimation, static, breath, LedOut
+from .animations import initAnimation, updateAnimation, static, breath, indexBreath, LedOut
 
 class Hexagon(QObject):
     '''
@@ -99,7 +99,7 @@ class HexPanel(QObject):
 
         self.ledStrip = self.generateLedStrip()
 
-        initAnimation(breath)
+        initAnimation(indexBreath)
 
     @Slot(result=float)
     def width(self):

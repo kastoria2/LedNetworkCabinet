@@ -114,8 +114,6 @@ def static(ledOut: LedOut, inputParams: InputParams):
 
 def breath(ledOut: LedOut, inputParams: InputParams):
 
-    ledOut.finalColor = inputParams.baseColor
-
     CYCLE_PERIOD = 10000
 
     # Max period is 5s for a breath cycle.
@@ -136,3 +134,17 @@ def breath(ledOut: LedOut, inputParams: InputParams):
     blue = int(blue * absPercentage)
 
     ledOut.finalColor = (red << 16) + (green << 8) + blue
+
+
+def indexBreath(ledOut: LedOut, inputParams: InputParams):
+    CYCLE_PERIOD = 20000
+
+    period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
+    cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
+    absPercentage = (cycleTime / period)
+
+    if ledOut.index / 98.0 <= absPercentage:
+        ledOut.finalColor = inputParams.baseColor
+    else:
+        ledOut.finalColor = 0
+
