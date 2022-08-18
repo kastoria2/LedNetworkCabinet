@@ -7,24 +7,19 @@ Item {
     property color outlineColor: "black"
     property color infillColor: "white"
 
+    property int lineWidth: 2
+
     property HexagonModel hexagonModel
     property double toScreenScale
 
     width: hexagonModel.getDiameter() * toScreenScale
     height: hexagonModel.getHeight() * toScreenScale
 
-    x: hexagonModel.getX() * toScreenScale
-    y: hexagonModel.getY() * toScreenScale
+    x: (hexagonModel.getX() * toScreenScale) - width/2
+    y: (hexagonModel.getY() * toScreenScale) - height/2
 
     Canvas {
         anchors.fill: parent
-
-        function rotateVector2d(v, radians) {
-            return [
-                v[0] * Math.cos(radians) - v[1] * Math.sin(radians),
-                v[0] * Math.sin(radians) + v[1] * Math.cos(radians)
-                    ];
-        }
 
         // vertices can have absolute coords.  Hexagon(x=100, y=50, radius=25).
         // Vertices are returned relative to that coordanites.
@@ -38,11 +33,10 @@ Item {
             ];
         }
 
-
         onPaint: {
             var ctx = getContext("2d");
 
-            ctx.lineWidth = 4;
+            ctx.lineWidth = lineWidth;
             ctx.strokeStyle = outlineColor;
             ctx.fillStyle = infillColor;
 

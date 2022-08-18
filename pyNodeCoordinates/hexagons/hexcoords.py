@@ -58,15 +58,20 @@ class Hexagon(QObject):
         hexagon.
         '''
         verts = self.getVertices()
-        return [verts[2], verts[3]]
+        return [verts[3], verts[4]]
 
     verticesChanged = Signal()
-    vertices = Property("QVariantList", getVertices, verticesChanged)
-    ledVertices = Property("QVariantList", getLedVertices, verticesChanged)
+    vertices = Property("QVariantList", getVertices, notify=verticesChanged)
+    ledVertices = Property("QVariantList", getLedVertices, notify=verticesChanged)
 
 class HexPanel(QObject):
     '''
-    Represents a physical hexagon panel.
+    Represents a physical hexagon panel.  Coordinate space is thought of as
+    [0,0] at top left, [width,hegiht] is bottom right.  Similar to raster space.
+    The hexagons are centered on the points.  So hex at index [0][0] could be at
+    position [0,0].  This means that the vectices around that could be negative
+    because the upper left vect will be "above and left" of the center (0,0) of
+    the hexagon.
     '''
 
     def __init__(self, 
@@ -79,6 +84,14 @@ class HexPanel(QObject):
         self.width_mm = width_mm
         self.height_mm = height_mm
         self.radius_mm = radius_mm
+
+        # Stored in row-major order.
+        self.hexagons = []
+        for row in range(self.rows()):
+            currentRow = []
+            for col in range(self.columns()):
+                currentRow.append(self._hexagonAtIndex(col, row))
+            self.hexagons.append(currentRow)
 
     @Slot(result=float)
     def width(self):
@@ -98,14 +111,72 @@ class HexPanel(QObject):
 
     @Slot(result=int)
     def columns(self):
-        return self.width_mm / (self.diameter() + self.radius())
+        return int(self.width_mm / (self.diameter() + self.radius()))
 
     @Slot(result=int)
     def rows(self):
-        return self.height_mm / ((hexagonHeight(self.radius_mm) ))
+        return int(self.height_mm / ((hexagonHeight(self.radius_mm))))
 
     @Slot(int, int, result=Hexagon)
-    def hexagonAtIndex(self, column, row):
+    def _hexagonAtIndex(self, column, row):
         x = (column * self.radius_mm * 3) + ((row+1)%2) * self.radius_mm * 1.5
         y = row * hexagonHeight(self.radius_mm) / 2
         return Hexagon(self, x, y, self.radius_mm)
+
+    @Slot(int, int, result=Hexagon)
+    def hexagonAtIndex(self, column, row):
+        #print(f'len(self.hexagons): {len(self.hexagons)}, len(hex[0]): {len(self.hexagons[0])} column: {column}, row: {row}')
+        return self.hexagons[row][column]
+
+    def getBounds(self):
+        topLefts = [
+            self.hexagonAtIndex(0,0),
+            self.hexagonAtIndex(0,1)
+        ]
+
+        print(f"topLefts: {topLefts}")
+
+        bottomRights = [
+            self.hexagonAtIndex(self.columns()-1, self.rows()-1),
+            self.hexagonAtIndex(self.columns()-1, self.rows()-2)
+        ]
+
+        print(f"bottomRights: {bottomRights}")
+
+        # Hack force the bounds a tad smaller to beat comparing
+        # 0.0 < 1.03*10^-5.
+        epsilon = 0.001
+
+        return [
+            [
+                min(topLefts[0].getX(), topLefts[1].getX()) + epsilon,
+                min(topLefts[0].getY(), topLefts[1].getY()) + epsilon
+            ],
+            [
+                max(bottomRights[0].getX(), bottomRights[1].getX()) - epsilon,
+                max(bottomRights[0].getY(), bottomRights[1].getY()) - epsilon
+            ]
+        ]
+
+    @Slot(result=list[Hexagon])
+    def getLedVertices(self) -> List[Hexagon]:
+
+        result = []
+
+        bounds = self.getBounds()
+        print(bounds)
+
+        def inBoundsExclusive(pt, topLeft, lowerRight):
+            print(f"{topLeft[1]} < {pt[1]} < {lowerRight[1]}")
+            return topLeft[0] < pt[0] < lowerRight[0] \
+                    and topLeft[1] < pt[1] < lowerRight[1]
+
+        for row in range(0, self.rows()):
+            for col in range(0, self.columns()):
+                ledLocations = self.hexagonAtIndex(col, row).getLedVertices()
+                result.extend(filter(lambda x: inBoundsExclusive(x, bounds[0], bounds[1]), ledLocations))
+
+        return result
+
+    ledsChanged = Signal()
+    leds = Property("QVariantList", getLedVertices, notify=ledsChanged)
