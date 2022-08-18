@@ -4,6 +4,8 @@ from .utils import hexagonHeight, rotateVector2d
 from typing import List
 from PySide2.QtCore import QObject, Property, Signal, Slot
 
+from .animations import initAnimation, updateAnimation, static
+
 class Hexagon(QObject):
     '''
     A hexagon at a given spatial coordinate.
@@ -93,6 +95,8 @@ class HexPanel(QObject):
                 currentRow.append(self._hexagonAtIndex(col, row))
             self.hexagons.append(currentRow)
 
+        initAnimation(static)
+
     @Slot(result=float)
     def width(self):
         return self.width_mm
@@ -128,20 +132,24 @@ class HexPanel(QObject):
         #print(f'len(self.hexagons): {len(self.hexagons)}, len(hex[0]): {len(self.hexagons[0])} column: {column}, row: {row}')
         return self.hexagons[row][column]
 
+    @Slot()
+    def update(self):
+        updateAnimation()
+
     def getBounds(self):
         topLefts = [
             self.hexagonAtIndex(0,0),
             self.hexagonAtIndex(0,1)
         ]
 
-        print(f"topLefts: {topLefts}")
+        #print(f"topLefts: {topLefts}")
 
         bottomRights = [
             self.hexagonAtIndex(self.columns()-1, self.rows()-1),
             self.hexagonAtIndex(self.columns()-1, self.rows()-2)
         ]
 
-        print(f"bottomRights: {bottomRights}")
+        # print(f"bottomRights: {bottomRights}")
 
         # Hack force the bounds a tad smaller to beat comparing
         # 0.0 < 1.03*10^-5.
@@ -164,10 +172,10 @@ class HexPanel(QObject):
         result = []
 
         bounds = self.getBounds()
-        print(bounds)
+        #print(bounds)
 
         def inBoundsExclusive(pt, topLeft, lowerRight):
-            print(f"{topLeft[1]} < {pt[1]} < {lowerRight[1]}")
+            #print(f"{topLeft[1]} < {pt[1]} < {lowerRight[1]}")
             return topLeft[0] < pt[0] < lowerRight[0] \
                     and topLeft[1] < pt[1] < lowerRight[1]
 
