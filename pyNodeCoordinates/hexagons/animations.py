@@ -42,7 +42,7 @@ class InputParams(object):
         # Some generic indicator of the speed for the anmitaion.
         # e.g. 'breath' could be faster or slower based on this
         # value.  Sin waves could adjust period based on this.
-        self.speed = 256
+        self.speed = 128
 
 
 GLOBAL_INPUT_PARAMS = InputParams()
@@ -90,7 +90,7 @@ def breath(ledOut:LedOut, inputParams:InputParams):
     
     ledOut.finalColor = inputParams.baseColor
     
-    CYCLE_PERIOD = 5000
+    CYCLE_PERIOD = 10000
 
     # Max period is 5s for a breath cycle.
     period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
