@@ -35,4 +35,4 @@ It all worked out well enough that I just kept printing.  The plan was to figure
 
 # Construction!!
 
-Checkout (the wiki)[https://github.com/kastoria2/LedNetworkCabinet/wiki]
+Checkout [the wiki](https://github.com/kastoria2/LedNetworkCabinet/wiki)
