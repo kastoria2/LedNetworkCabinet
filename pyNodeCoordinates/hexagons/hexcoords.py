@@ -49,7 +49,7 @@ class Hexagon(QObject):
         points = []
         for i in range(6):
             hexagonSpace = rotateVector2d(p0, i * math.pi/3)
-            worldSpace = [hexagonSpace[0] + self.x, hexagonSpace[1]+self.y] 
+            worldSpace = [hexagonSpace[0] + self.x, hexagonSpace[1]+self.y]
             points.append(worldSpace)
 
         return points
@@ -66,6 +66,7 @@ class Hexagon(QObject):
     vertices = Property("QVariantList", getVertices, notify=verticesChanged)
     ledVertices = Property("QVariantList", getLedVertices, notify=verticesChanged)
 
+
 class HexPanel(QObject):
     '''
     Represents a physical hexagon panel.  Coordinate space is thought of as
@@ -76,11 +77,12 @@ class HexPanel(QObject):
     the hexagon.
     '''
 
-    def __init__(self, 
-        parent:QObject=None,
-        width_mm:float=1000,
-        height_mm:float=1000,
-        radius_mm:float=50):
+    def __init__(
+            self,
+            parent: QObject = None,
+            width_mm: float = 1000,
+            height_mm: float = 1000,
+            radius_mm: float = 50):
 
         QObject.__init__(self, parent)
         self.width_mm = width_mm
@@ -123,13 +125,13 @@ class HexPanel(QObject):
 
     @Slot(int, int, result=Hexagon)
     def _hexagonAtIndex(self, column, row):
-        x = (column * self.radius_mm * 3) + ((row+1)%2) * self.radius_mm * 1.5
+        x = (column * self.radius_mm * 3) + ((row+1) % 2) * self.radius_mm * 1.5
         y = row * hexagonHeight(self.radius_mm) / 2
         return Hexagon(self, x, y, self.radius_mm)
 
     @Slot(int, int, result=Hexagon)
     def hexagonAtIndex(self, column, row):
-        #print(f'len(self.hexagons): {len(self.hexagons)}, len(hex[0]): {len(self.hexagons[0])} column: {column}, row: {row}')
+        # print(f'len(self.hexagons): {len(self.hexagons)}, len(hex[0]): {len(self.hexagons[0])} column: {column}, row: {row}')
         return self.hexagons[row][column]
 
     @Slot()
@@ -137,14 +139,13 @@ class HexPanel(QObject):
         updateAnimation()
         self.ledsChanged.emit()
 
-
     def getBounds(self):
         topLefts = [
-            self.hexagonAtIndex(0,0),
-            self.hexagonAtIndex(0,1)
+            self.hexagonAtIndex(0, 0),
+            self.hexagonAtIndex(0, 1)
         ]
 
-        #print(f"topLefts: {topLefts}")
+        # print(f"topLefts: {topLefts}")
 
         bottomRights = [
             self.hexagonAtIndex(self.columns()-1, self.rows()-1),
@@ -174,10 +175,10 @@ class HexPanel(QObject):
         result = []
 
         bounds = self.getBounds()
-        #print(bounds)
+        # print(bounds)
 
         def inBoundsExclusive(pt, topLeft, lowerRight):
-            #print(f"{topLeft[1]} < {pt[1]} < {lowerRight[1]}")
+            # print(f"{topLeft[1]} < {pt[1]} < {lowerRight[1]}")
             return topLeft[0] < pt[0] < lowerRight[0] \
                     and topLeft[1] < pt[1] < lowerRight[1]
 

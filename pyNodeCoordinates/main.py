@@ -4,10 +4,11 @@ from pathlib import Path
 import sys
 
 from PySide2.QtGui import QGuiApplication
-from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType, QQmlContext
+from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType
 
 from hexagons.hexcoords import Hexagon, HexPanel
 from PyHexagon import PyHexagon
+
 
 if __name__ == "__main__":
     qmlRegisterType(PyHexagon, "com.fathom.hexagonpanel", 1, 0, "PyHexagon")
@@ -19,11 +20,10 @@ if __name__ == "__main__":
 
     engine.rootContext().setContextProperty("globalStringTest", "zens11")
 
-    hexagonPanelModel = HexPanel(None, (100*4)+ (50* 4.5), (86.6 * 17), 50)
+    hexagonPanelModel = HexPanel(None, (100 * 4) + (50 * 4.5), (86.6 * 17), 50)
     engine.rootContext().setContextProperty("GlobalHexagonPanelModel", hexagonPanelModel)
 
     engine.load(os.fspath(Path(__file__).resolve().parent / "main.qml"))
-
 
     if not engine.rootObjects():
         sys.exit(-1)

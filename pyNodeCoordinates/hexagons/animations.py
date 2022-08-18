@@ -1,28 +1,30 @@
 import time
 from typing import List
 
+
 class LedOut(object):
     '''
-    Looks something like a Struct to hold parameters to control the 
-    output of a LED. 
+    Looks something like a Struct to hold parameters to control the
+    output of a LED.
     '''
 
-    def __init__(self, index:int, position:List[List[int]]):
+    def __init__(self, index: int, position: List[List[int]]):
         self.finalColor = 0
 
         self.index = index
         self.position = position
+
 
 class InputParams(object):
     '''
     Looks something like a Struct to hold input parameters that can
     be used to compute animation state.
     '''
-    
+
     def __init__(self):
         self.reset(0)
 
-    def reset(self, currentTime_ms:int):
+    def reset(self, currentTime_ms: int):
 
         # The start of the animation cycle.
         self.startTime_ms = currentTime_ms
@@ -47,9 +49,10 @@ class InputParams(object):
 
 GLOBAL_INPUT_PARAMS = InputParams()
 GLOBAL_ANIMATION_METHOD = None
-GLOBAL_LEDS = [LedOut(i, [0,0]) for i in range(98)]
+GLOBAL_LEDS = [LedOut(i, [0, 0]) for i in range(98)]
 
-def initAnimation(animationMethod, currentTime_ms:int = None):
+
+def initAnimation(animationMethod, currentTime_ms: int = None):
 
     if currentTime_ms is None:
         currentTime_ms = int(time.time()*1000)
@@ -62,12 +65,13 @@ def initAnimation(animationMethod, currentTime_ms:int = None):
     global GLOBAL_ANIMATION_METHOD
     GLOBAL_ANIMATION_METHOD = animationMethod
 
-def updateAnimation(currentTime_ms:int = None):
-    
+
+def updateAnimation(currentTime_ms: int = None):
+
     if currentTime_ms is None:
         currentTime_ms = int(time.time()*1000)
-    
-    #print(f"currentTime_ms: {currentTime_ms}")
+
+    # print(f"currentTime_ms: {currentTime_ms}")
 
     global GLOBAL_INPUT_PARAMS
 
@@ -80,21 +84,24 @@ def updateAnimation(currentTime_ms:int = None):
     for led in GLOBAL_LEDS:
         GLOBAL_ANIMATION_METHOD(led, GLOBAL_INPUT_PARAMS)
 
-def static(ledOut:LedOut, inputParams:InputParams):
+
+def static(ledOut: LedOut, inputParams: InputParams):
     '''
     'Animation' that just displays a single, static color.
     '''
+
     ledOut.finalColor = inputParams.baseColor
 
-def breath(ledOut:LedOut, inputParams:InputParams):
-    
+
+def breath(ledOut: LedOut, inputParams: InputParams):
+
     ledOut.finalColor = inputParams.baseColor
-    
+
     CYCLE_PERIOD = 10000
 
     # Max period is 5s for a breath cycle.
     period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
-    
+
     cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
 
     absPercentage = (abs((period/2.0) - cycleTime) / period) * 2
@@ -103,7 +110,7 @@ def breath(ledOut:LedOut, inputParams:InputParams):
     green = (inputParams.baseColor & 0x00ff00) >> 8
     blue = inputParams.baseColor & 0x0000ff
 
-    #print(f"period: {period}, cycleTime: {cycleTime}, absPercentage: {absPercentage}, red: {red}, green: {green}, blue: {blue}")
+    # print(f"period: {period}, cycleTime: {cycleTime}, absPercentage: {absPercentage}, red: {red}, green: {green}, blue: {blue}")
 
     red = int(red * absPercentage)
     green = int(green * absPercentage)

@@ -1,3 +1,7 @@
+2022-08-07
+    - Have a 'breath' animation working.  But the colors are hard-coded to a the [0] LED.
+    - Don't have a mapping from index [0, 98) to the strip locations.
+
 2022-07-28
 I have 2 strips of 49 LEDs each assembled and tested.
 Raw data on current draws for a strip of 49 LEDs
