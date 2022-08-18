@@ -148,7 +148,7 @@ def indexBreath(ledOut: LedOut, inputParams: InputParams):
     cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
     absPercentage = (cycleTime / period)
 
-    if ledOut.index / 98.0 <= absPercentage:
+    if (ledOut.index / 98.0) <= absPercentage:
         ledOut.finalColor = inputParams.baseColor
     else:
         ledOut.finalColor = 0

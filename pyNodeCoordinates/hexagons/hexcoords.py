@@ -100,7 +100,7 @@ class HexPanel(QObject):
 
         self.ledStrip = self.generateLedStrip()
 
-        initAnimation(radiate)
+        initAnimation(indexBreath)
 
     @Slot(result=float)
     def width(self):
@@ -124,11 +124,11 @@ class HexPanel(QObject):
 
     @Slot(result=int)
     def rows(self):
-        return int(self.height_mm / ((hexagonHeight(self.radius_mm)))) * 2 + 1
+        return int(self.height_mm / ((hexagonHeight(self.radius_mm)))) * 2
 
     @Slot(int, int, result=Hexagon)
     def _hexagonAtIndex(self, column, row):
-        x = (column * self.radius_mm * 3) + ((row+1) % 2) * self.radius_mm * 1.5
+        x = (column * self.radius_mm * 3) + ((row) % 2) * self.radius_mm * 1.5
         y = row * hexagonHeight(self.radius_mm) / 2
         return Hexagon(self, x, y, self.radius_mm)
 
@@ -218,7 +218,7 @@ class HexPanel(QObject):
 
         # Sort the rows by X value alternating decreasing and increasing.
         for i in range(len(rows)):
-            rows[i].sort(key=lambda lo: lo._position[0], reverse=(i % 2) == 0)
+            rows[i].sort(key=lambda lo: lo._position[0], reverse=((i+1) % 2) == 0)
 
         # Flatten the results.
         result = []
