@@ -1,3 +1,4 @@
+import math
 import time
 from typing import List
 
@@ -63,6 +64,9 @@ class InputParams(object):
         # If there is an accent color used in the animation.
         self.accentColor = 0
 
+        # Generic location.  Useful for generating waves or gradients
+        self.baseLocation = [0, 0]
+
         # Some generic indicator of the speed for the anmitaion.
         # e.g. 'breath' could be faster or slower based on this
         # value.  Sin waves could adjust period based on this.
@@ -81,6 +85,7 @@ def initAnimation(animationMethod, currentTime_ms: int = None):
     GLOBAL_INPUT_PARAMS.reset(currentTime_ms)
 
     GLOBAL_INPUT_PARAMS.baseColor = 0xff00ff
+    GLOBAL_INPUT_PARAMS.baseLocation = [625/2.0, 732/2.0]
 
     global GLOBAL_ANIMATION_METHOD
     GLOBAL_ANIMATION_METHOD = animationMethod
@@ -148,3 +153,44 @@ def indexBreath(ledOut: LedOut, inputParams: InputParams):
     else:
         ledOut.finalColor = 0
 
+
+def distance(v1, v2):
+    delta = [
+        v2[0] - v1[0],
+        v2[1] - v1[1]
+    ]
+
+    return math.sqrt(delta[0]**2 + delta[1]**2)
+
+
+def clamp(value, lower, upper):
+    if value < lower:
+        return lower
+
+    if value > upper:
+        return upper
+
+    return value
+
+def radiate(ledOut: LedOut, inputParams: InputParams):
+    CYCLE_PERIOD = 5000
+
+    period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
+    cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
+    absPercentage = (cycleTime / period)
+
+    maxDist = distance([0, 0], [625, 736])
+    ledDist = distance(inputParams.baseLocation, ledOut.position)
+    ledPercent = ledDist / maxDist
+
+    red = (inputParams.baseColor & 0xff0000) >> 16
+    green = (inputParams.baseColor & 0x00ff00) >> 8
+    blue = inputParams.baseColor & 0x0000ff
+
+    scaleFactor = clamp((1 - math.fabs(absPercentage - ledPercent) * 5), 0, 1.0)
+
+    red = int(red * scaleFactor)
+    green = int(green * scaleFactor)
+    blue = int(blue * scaleFactor)
+
+    ledOut.finalColor = (red << 16) + (green << 8) + blue

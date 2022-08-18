@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     engine.rootContext().setContextProperty("globalStringTest", "zens11")
 
-    hexagonPanelModel = HexPanel(None, (100 * 4) + (50 * 4.5), (86.6 * 17), 50)
+    hexagonPanelModel = HexPanel(None, (100 * 4) + (50 * 4.5), (86.6 * 8.5), 50)
     engine.rootContext().setContextProperty("GlobalHexagonPanelModel", hexagonPanelModel)
 
     engine.load(os.fspath(Path(__file__).resolve().parent / "main.qml"))
