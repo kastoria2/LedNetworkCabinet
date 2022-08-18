@@ -52,8 +52,17 @@ class Hexagon(QObject):
 
         return points
 
+    def getLedVertices(self) -> List[List[float]]:
+        '''
+        Returns the vertices that have LEDs 'owned' by this
+        hexagon.
+        '''
+        verts = self.getVertices()
+        return [verts[2], verts[3]]
+
     verticesChanged = Signal()
     vertices = Property("QVariantList", getVertices, verticesChanged)
+    ledVertices = Property("QVariantList", getLedVertices, verticesChanged)
 
 class HexPanel(QObject):
     '''
