@@ -26,6 +26,19 @@ Item {
                     ];
         }
 
+        // vertices can have absolute coords.  Hexagon(x=100, y=50, radius=25).
+        // Vertices are returned relative to that coordanites.
+        // Those coordinates map into screen space relative to the current
+        // pen position.  e.g. (125, 50) is vert[0] in world space but relative
+        // to the hex being drawn it is (radius*screenScale, 0).
+        function toHexagonScreenSpace(v) {
+            return [
+                (v[0]-hexagonModel.getX()) * toScreenScale,
+                (v[1]-hexagonModel.getY()) * toScreenScale
+            ];
+        }
+
+
         onPaint: {
             var ctx = getContext("2d");
 
@@ -37,12 +50,13 @@ Item {
 
             ctx.beginPath();
 
-            var currentPoint = [hexagonModel.getRadius() * toScreenScale, 0];
-            ctx.moveTo(currentPoint[0], currentPoint[1]);
+            var verts = hexagonModel.vertices;
 
-            for(var i = 0; i < 6; i++)
+            var currentPoint = toHexagonScreenSpace(verts[0]);
+            ctx.moveTo(currentPoint[0], currentPoint[1])
+            for(var i = 1; i < verts.length; i++)
             {
-                currentPoint = rotateVector2d(currentPoint, 60 * Math.PI/180);
+                currentPoint = toHexagonScreenSpace(verts[i]);
                 ctx.lineTo(currentPoint[0], currentPoint[1]);
             }
 

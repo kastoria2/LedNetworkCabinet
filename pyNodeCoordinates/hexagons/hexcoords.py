@@ -1,6 +1,7 @@
 import math
 
 from .utils import hexagonHeight, rotateVector2d
+from typing import List
 from PySide2.QtCore import QObject, Property, Signal, Slot
 
 class Hexagon(QObject):
@@ -35,7 +36,7 @@ class Hexagon(QObject):
     def getHeight(self):
         return self.radius * 2 * (1/1.1547005)
 
-    def vertices(self) -> list[list[float]]:
+    def getVertices(self) -> List[List[float]]:
         '''
         Returns the vertices that comprise the hexagon.  Each vertex is a
         list of [x,y].
@@ -50,6 +51,9 @@ class Hexagon(QObject):
             points.append(worldSpace)
 
         return points
+
+    verticesChanged = Signal()
+    vertices = Property("QVariantList", getVertices, verticesChanged)
 
 class HexPanel(QObject):
     '''
