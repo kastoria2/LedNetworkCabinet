@@ -33,9 +33,9 @@ struct InputParams {
     startTime_ms(0),
     currentTime_ms(0),
     deltaTime_ms(0),
-    color(NeoPixels::Color(0xFF, 0, 0xFF)),
+    color(NeoPixels::Color(32, 32, 0xFF)),
     bgColor(NeoPixels::Color(0,0,0)),
-    baseLocation_mm {0,0},
+    baseLocation_mm {275,300},
     speed(128)
   {}
 };
@@ -209,7 +209,7 @@ void animation_radiate(const InputParams& inputParams, LedOut& ledOut)
 
     uint32_t period = int(CYCLE_PERIOD * ((256 - inputParams.speed) / 255.0));
     uint32_t cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period;
-    float absPercentage = (cycleTime / period);
+    float absPercentage = (float(cycleTime) / period);
 
     float ledDist = distance(inputParams.baseLocation_mm, ledOut.position_mm);
     float ledPercent = ledDist / maxDist;
