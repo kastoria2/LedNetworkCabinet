@@ -32,3 +32,7 @@ It all worked out well enough that I just kept printing.  The plan was to figure
 - 3D printer and slicer
 - Soldering iron, solder, soldering skills, etc
 - Use Arduino IDE to compile a sketch to a microcontroller
+
+# Construction!!
+
+Checkout (the wiki)[https://github.com/kastoria2/LedNetworkCabinet/wiki]
