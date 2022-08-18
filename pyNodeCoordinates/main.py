@@ -6,10 +6,12 @@ import sys
 from PySide2.QtGui import QGuiApplication
 from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType
 
+from hexagons.hexcoords import Hexagon
 from PyHexagon import PyHexagon
 
 if __name__ == "__main__":
     qmlRegisterType(PyHexagon, "com.fathom.hexagonpanel", 1, 0, "PyHexagon")
+    qmlRegisterType(Hexagon, "com.fathom.hexagonpanel", 1, 0, "HexagonModel")
 
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()

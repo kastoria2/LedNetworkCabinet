@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import com.fathom.hexagonpanel 1.0
 
 Rectangle {
     id: hexpanel
