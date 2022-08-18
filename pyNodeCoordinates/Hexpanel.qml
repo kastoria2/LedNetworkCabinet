@@ -11,10 +11,14 @@ Rectangle {
     property double widthScale: width / physicalWidth
     property double heightScale: height / physicalHeight
 
-    property double columns: physicalWidth / hexagonRadius
-    property double rows: (physicalHeight / hexagonRadius) * 2
+    property double columns: physicalWidth / (hexagonRadius * 2)
+    property double rows: physicalHeight / (hexagonRadius * 2) * 2
 
     color: "light gray"
+
+    Text {
+        text: `${widthScale}, ${heightScale}`
+    }
 
     Repeater {
         id: rowRepeater
@@ -26,13 +30,12 @@ Rectangle {
 
             property int rowIndex: index
 
-            Rectangle {
+            Hexagon {
                 color: "black"
-                width: 5
-                height: 5
+                radius: hexpanel.hexagonRadius * widthScale
 
-                x: ((index * hexpanel.hexagonRadius) * widthScale) + (rowIndex%2)*(hexpanel.hexagonRadius/2)*widthScale
-                y: ((rowIndex * hexpanel.hexagonRadius) * heightScale)/2
+                x: ((index * hexpanel.hexagonRadius * 3) * widthScale) + (rowIndex%2)*(hexpanel.hexagonRadius * 1.5)*widthScale
+                y: (rowIndex * height/2)
             }
         }
     }

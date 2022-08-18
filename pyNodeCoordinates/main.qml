@@ -2,8 +2,8 @@ import QtQuick 2.14
 import QtQuick.Window 2.14
 
 Window {
-    width: 640
-    height: 480
+    width: 800
+    height: 800
     visible: true
     title: qsTr("Hello World")
 
@@ -16,7 +16,8 @@ Window {
 
         Hexpanel
         {
-            anchors.fill: parent
+            width: parent.width
+            height: parent.height
         }
     }
 }
