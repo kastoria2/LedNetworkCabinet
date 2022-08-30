@@ -70,6 +70,11 @@ void animation_breath(const InputParams& inputParams, LedOut& ledOut)
     ledOut.color = NeoPixels::Color(red, green,blue);
 }
 
+float blend(float a, float b, float t)
+{
+  return (a * t) + (b * (1.0-t));
+}
+
 void animation_radiate(const InputParams& inputParams, LedOut& ledOut)
 {
     uint32_t CYCLE_PERIOD = 5000;
@@ -87,9 +92,13 @@ void animation_radiate(const InputParams& inputParams, LedOut& ledOut)
 
     float scaleFactor = clamp((1 - abs(absPercentage - ledPercent) * 5), 0, 1.0);
 
-    red = int(red * scaleFactor);
-    green = int(green * scaleFactor);
-    blue = int(blue * scaleFactor);
+    uint8_t bgRed = (inputParams.bgColor & 0xff0000) >> 16;
+    uint8_t bgGreen = (inputParams.bgColor & 0x00ff00) >> 8;
+    uint8_t bgBlue = (inputParams.bgColor & 0x0000ff);
+
+    red = blend(red, bgRed, scaleFactor);
+    green = blend(green, bgGreen, scaleFactor);
+    blue = blend(blue, bgBlue, scaleFactor);
 
     ledOut.color = NeoPixels::Color(red, green, blue);
 }

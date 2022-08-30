@@ -4,7 +4,7 @@ from typing import List
 
 from PySide2.QtCore import QObject, Property, Signal
 
-from .utils import mm2um
+from .utils import mm2um, blend
 
 class LedOut(QObject):
     '''
@@ -74,10 +74,10 @@ class InputParams(object):
         self.deltaTime_ms = 0
 
         # Basic color for the animation
-        self.baseColor = 0xff0000
+        self.baseColor = 0x000000
 
         # If there is an accent color used in the animation.
-        self.accentColor = 0
+        self.accentColor = 0x000000
 
         # Generic location.  Useful for generating waves or gradients
         self.baseLocation_um = [0, 0]
@@ -101,6 +101,7 @@ def initAnimation(animationMethod, currentTime_ms: int = None):
     GLOBAL_INPUT_PARAMS.reset(currentTime_ms)
 
     GLOBAL_INPUT_PARAMS.baseColor = 0xff00ff
+    GLOBAL_INPUT_PARAMS.accentColor = 0x00ff00
     GLOBAL_INPUT_PARAMS.baseLocation_um = [mm2um(625) / 2, mm2um(732) / 2]
 
     global GLOBAL_ANIMATION_METHOD
@@ -204,10 +205,14 @@ def radiate(ledOut: LedOut, inputParams: InputParams):
     green = (inputParams.baseColor & 0x00ff00) >> 8
     blue = inputParams.baseColor & 0x0000ff
 
-    scaleFactor = clamp((1 - math.fabs(absPercentage - ledPercent) * 5), 0, 1.0)
+    scaleFactor = clamp((1 - math.fabs(absPercentage - ledPercent) * 10), 0, 1.0)
 
-    red = int(red * scaleFactor)
-    green = int(green * scaleFactor)
-    blue = int(blue * scaleFactor)
+    bgRed = (inputParams.accentColor & 0xff0000) >> 16
+    bgGreen = (inputParams.accentColor & 0x00ff00) >> 8
+    bgBlue = (inputParams.accentColor & 0x0000ff)
+
+    red = int(blend(red, bgRed, scaleFactor))
+    green = int(blend(green, bgGreen, scaleFactor))
+    blue = int(blend(blue, bgBlue, scaleFactor))
 
     ledOut.finalColor = (red << 16) + (green << 8) + blue

@@ -1,5 +1,5 @@
 import math
-from typing import List
+from typing import List, Tuple
 
 
 def rotateVector2d(vec: List[float], radians) -> List[float]:
@@ -22,3 +22,7 @@ def um2mm(um: int):
 
 def mm2um(mm: float):
     return int(mm * UM_IN_MM)
+
+
+def blend(a: float, b: float, t: float):
+    return (a * t) + (b * (1.0-t))
