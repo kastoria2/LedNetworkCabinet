@@ -102,7 +102,7 @@ def initAnimation(animationMethod, currentTime_ms: int = None):
 
     GLOBAL_INPUT_PARAMS.baseColor = 0xff00ff
     GLOBAL_INPUT_PARAMS.accentColor = 0x00ff00
-    GLOBAL_INPUT_PARAMS.baseLocation_um = [mm2um(625) / 2, mm2um(732) / 2]
+    GLOBAL_INPUT_PARAMS.baseLocation_um = [mm2um(625) / 2, mm2um(736) / 2]
 
     global GLOBAL_ANIMATION_METHOD
     GLOBAL_ANIMATION_METHOD = animationMethod
@@ -216,3 +216,20 @@ def radiate(ledOut: LedOut, inputParams: InputParams):
     blue = int(blend(blue, bgBlue, scaleFactor))
 
     ledOut.finalColor = (red << 16) + (green << 8) + blue
+
+
+def basePoint(ledOut: LedOut, inputParams: InputParams):
+
+    red = (inputParams.baseColor & 0xff0000) >> 16
+    green = (inputParams.baseColor & 0x00ff00) >> 8
+    blue = inputParams.baseColor & 0x0000ff
+
+    ledDist = distance(inputParams.baseLocation_um, ledOut.position_um)
+    maxDist = mm2um(60)
+
+    if ledOut.index == 45:
+        pass
+
+    ledOut.finalColor = 0
+    if ledDist < maxDist:
+        ledOut.finalColor = inputParams.baseColor

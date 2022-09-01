@@ -7,7 +7,7 @@ from typing import List
 from PySide2.QtCore import QObject, Property, Signal, Slot
 
 from .animations import initAnimation, updateAnimation, LedOut
-from .animations import static, breath, indexBreath, radiate
+from .animations import static, breath, indexBreath, radiate, basePoint
 
 
 class Hexagon(QObject):
@@ -138,6 +138,10 @@ class HexPanel(QObject):
     def _hexagonAtIndex(self, column, row):
         x = (column * self.radius_mm * 3) + ((row) % 2) * self.radius_mm * 1.5
         y = row * hexagonHeight(self.radius_mm) / 2
+
+        x = x + self.radius_mm
+        y = y + hexagonHeight(self.radius_mm) / 2
+
         return Hexagon(self, x, y, self.radius_mm)
 
     @Slot(int, int, result=Hexagon)
@@ -260,6 +264,8 @@ class HexPanel(QObject):
             buffer.append(f"LedOut {{{i}, {{{um2mm(led.position_um[0])},{um2mm(led.position_um[1])}}}, NeoPixels::Color(0,0,0)}},")
 
         buffer.append("};")
+
+        buffer.append(f"width: {self.width_mm}, height: {self.height_mm}")
 
         return "\n".join(buffer)
 

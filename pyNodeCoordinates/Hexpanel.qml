@@ -12,16 +12,6 @@ Rectangle {
     color: "light gray"
 
     Item {
-        // Raster offset so the (0,0) hexagon at (0,0) world space is on screen.
-
-        // Raster space rendering the 'panel' using a coordinate space detailed in
-        // the Python HexagonPanel object.
-        // Both spaces have origin (0,0) at top left with
-        // increasing x to right and y down.
-
-        x: hexagonPanelModel.radius() * hexpanel.widthScale
-        y: hexagonPanelModel.radius() * hexpanel.widthScale
-
         Repeater {
             id: rowRepeater
             model: hexpanel.hexagonPanelModel.rows()
