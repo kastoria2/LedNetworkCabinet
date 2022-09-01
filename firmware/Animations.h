@@ -23,7 +23,7 @@ struct InputParams {
     deltaTime_ms(0),
     color(NeoPixels::Color(0, 0xFF, 0)),
     bgColor(NeoPixels::Color(0xFF,0,0xFF)),
-    baseLocation_mm {275,300},
+    baseLocation_mm {625/2,736/2},
     speed(128)
   {}
 };
