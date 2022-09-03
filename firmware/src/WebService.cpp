@@ -5,6 +5,9 @@
 #include <WebServer.h>
 #include <ArduinoJson.h>
 
+#include <uri/UriBraces.h>
+#include <uri/UriRegex.h>
+
 #include "Animations.h"
 
 #define DEFAULT_SSID "den_24"
@@ -77,6 +80,86 @@ void updateBgColor() {
   server.send(200, "text/plain", "Setting Color");
 }
 
+void postTest() {
+  String colorName = server.pathArg(0);
+
+  String bodyTxt = server.arg("plain");
+  server.send(200, "text/plain", colorName + bodyTxt);
+}
+
+void colorToJson(uint32_t source, DynamicJsonDocument& doc){
+  doc.clear();
+
+  doc["red"] = (source & 0x00ff0000) >> 16;
+  doc["green"] = (source & 0x0000ff00) >> 8;
+  doc["blue"] = (source & 0x000000ff);
+}
+
+void getRadiateAnimationSettings(DynamicJsonDocument& doc) {
+
+  doc.clear();
+
+  doc["name"] = "radiate";
+
+  DynamicJsonDocument color(256);
+  colorToJson(inputParams.color, color);
+  doc["color"] = color;
+
+  DynamicJsonDocument bgColor(256);
+  colorToJson(inputParams.bgColor, bgColor);
+  doc["bgColor"] = bgColor;
+}
+
+uint32_t jsonToColor(const DynamicJsonDocument& doc)
+{
+  uint32_t ret = 0;
+  ret += int(doc["red"]) << 16;
+  ret += int(doc["green"]) << 8;
+  ret += int(doc["blue"]);
+
+  return ret;
+}
+
+void getAnimationSettings() {
+  String animationName = server.pathArg(0);
+
+  char buffer[1024];
+  DynamicJsonDocument respBody(1024);
+  if(animationName.equalsIgnoreCase("radiate"))
+  {
+    getRadiateAnimationSettings(respBody);
+    serializeJson(respBody, buffer, 1024);
+    server.send(200, "text/plain", buffer);
+  }
+  else
+  {
+    server.send(404, "text/plain", "Unknown animation: " + animationName);
+  }
+}
+
+void setRadiateAnimationSettings(const String& body)
+{
+  DynamicJsonDocument doc(1024);
+  deserializeJson(doc, body);
+
+  inputParams.color = jsonToColor(doc["color"]);
+  inputParams.bgColor = jsonToColor(doc["bgColor"]);
+}
+
+void postAnimationSettings() {
+  String animationName = server.pathArg(0);
+
+  if(animationName.equalsIgnoreCase("radiate"))
+  {
+    setRadiateAnimationSettings(server.arg("plain"));
+    server.send(200);
+  }
+  else
+  {
+    server.send(404, "text/plain", "Unknown animation: " + animationName);
+  }
+}
+
 void initWebService(void) {    
 
   DBG_OUTPUT_PORT.begin(9600);
@@ -108,9 +191,8 @@ void initWebService(void) {
     DBG_OUTPUT_PORT.println(WiFi.localIP());
   }
     
-  server.on("/list", HTTP_GET, printDirectory);
-  server.on("/color", HTTP_GET, updateColor);
-  server.on("/bgcolor", HTTP_GET, updateBgColor);
+  server.on(UriRegex("^\\/api\\/v1\\/animation\\/([a-zA-Z]+)\\/settings"), HTTP_GET, getAnimationSettings);
+  server.on(UriRegex("^\\/api\\/v1\\/animation\\/([a-zA-Z]+)\\/settings"), HTTP_POST, postAnimationSettings);
   server.onNotFound(handleNotFound);
 
   server.begin();
