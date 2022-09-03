@@ -40,7 +40,7 @@ void returnFail(String msg) {
 }
 
 void printDirectory() {
-  server.send(200, "text/plain", "zens");
+  server.send(200, "text/plain", "zens_2022-09-03");
 }
 
 void handleNotFound() {
