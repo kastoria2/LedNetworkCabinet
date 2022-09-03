@@ -59,29 +59,22 @@ void handleNotFound() {
   DBG_OUTPUT_PORT.print(message);
 }
 
+uint32_t colorFromRequestArguments() {
+  String redStr = server.arg("red");
+  String greenStr = server.arg("green");
+  String blueStr = server.arg("blue");
+
+  return NeoPixels::Color(redStr.toInt(), greenStr.toInt(), blueStr.toInt());
+}
+
 void updateColor() {
+  inputParams.color = colorFromRequestArguments();
+  server.send(200, "text/plain", "Setting Color");
+}
 
-    String redStr = server.arg("red");
-    String greenStr = server.arg("green");
-    String blueStr = server.arg("blue");
-
-    uint8_t red = redStr.toInt();
-    uint8_t green = greenStr.toInt();
-    uint8_t blue = blueStr.toInt();
-
-    String msg = "Color received: ";
-    msg += "red:";
-    msg += redStr;
-    msg += ", green:";
-    msg += greenStr;
-    msg += ", blue:";
-    msg += blueStr;
-
-    DBG_OUTPUT_PORT.println(msg);
-
-    inputParams.color = NeoPixels::Color(red, green, blue);
-
-    server.send(200, "text/plain", "Setting Color");
+void updateBgColor() {
+  inputParams.bgColor = colorFromRequestArguments();
+  server.send(200, "text/plain", "Setting Color");
 }
 
 void initWebService(void) {    
@@ -117,6 +110,7 @@ void initWebService(void) {
     
   server.on("/list", HTTP_GET, printDirectory);
   server.on("/color", HTTP_GET, updateColor);
+  server.on("/bgcolor", HTTP_GET, updateBgColor);
   server.onNotFound(handleNotFound);
 
   server.begin();
