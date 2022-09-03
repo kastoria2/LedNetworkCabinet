@@ -9,9 +9,9 @@ struct LedOut {
   uint8_t index;
   float position_mm[2];
 
-  float distance;
-
   uint32_t color;
+
+  float distance;
 };
 
 #define NUM_LEDS 98
