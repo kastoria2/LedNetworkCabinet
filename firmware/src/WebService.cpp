@@ -10,6 +10,116 @@
 
 #include "Animations.h"
 
+const char* RADIATE_SETTINGS_PAGE = R"~(
+<script type="importmap">
+    {
+      "imports": {
+        "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+      }
+    }
+</script>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+</head>
+
+<body>
+    <div id="app">
+
+        <div class="container">
+            <div class="row" v-if="radiateSettings">
+                <div class="col-sm ">{{radiateSettings.name}}</div>
+                <div class="col-sm">Color: <input class="form-control" type="color" v-model="tmpColor" /></div>
+                <div class="col-sm">bgColor: <input class="form-control" type="color" v-model="tmpBgColor" /></div>
+                <button class="col-sm" @click="saveSettings">Save</button>
+            </div>
+            <div class="row" v-else>
+                <button class="col col-sm-12" @click="fetchTest">Load settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
+
+<script type="module">
+    import { createApp } from 'vue'
+
+    function componentToHex(c) {
+        var hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+    }
+
+    function rgbToHex(r, g, b) {
+        return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+    }
+
+    function hexToRgb(hex) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            red: parseInt(result[1], 16),
+            green: parseInt(result[2], 16),
+            blue: parseInt(result[3], 16)
+        } : null;
+    }
+
+    createApp({
+        data() {
+            return {
+                message: 'Hello Vue!',
+                radiateSettings: null,
+                tmpColor: "#FF0000",
+                tmpBgColor: "#00FF00"
+            }
+        },
+        methods: {
+            async fetchTest() {
+
+                const response = await fetch('http://192.168.0.232/api/v1/animation/radiate/settings');
+                const data = await response.json();
+                this.radiateSettings = data;
+
+                this.tmpColor = rgbToHex(
+                    this.radiateSettings.color["red"],
+                    this.radiateSettings.color["green"],
+                    this.radiateSettings.color["blue"]);
+
+                this.tmpBgColor = rgbToHex(
+                    this.radiateSettings.bgColor["red"],
+                    this.radiateSettings.bgColor["green"],
+                    this.radiateSettings.bgColor["blue"]
+                );
+            },
+            async saveSettings() {
+                this.radiateSettings.color = hexToRgb(this.tmpColor);
+                this.radiateSettings.bgColor = hexToRgb(this.tmpBgColor);
+
+                const response = await fetch(
+                    'http://192.168.0.232/api/v1/animation/radiate/settings', {
+                    method: 'POST',
+                    body: JSON.stringify(this.radiateSettings)
+                }
+                );
+
+                this.fetchTest();
+            }
+        }
+    }).mount('#app')
+</script>
+)~";
+
 #define DEFAULT_SSID "den_24"
 char ssid[80] = DEFAULT_SSID;
 
@@ -160,6 +270,11 @@ void postAnimationSettings() {
   }
 }
 
+void getIndex()
+{
+  server.send(200, "text/html", RADIATE_SETTINGS_PAGE);
+}
+
 void initWebService(void) {    
 
   DBG_OUTPUT_PORT.begin(9600);
@@ -190,10 +305,13 @@ void initWebService(void) {
     DBG_OUTPUT_PORT.print("Connected! IP address: ");
     DBG_OUTPUT_PORT.println(WiFi.localIP());
   }
-    
+  
+  server.on("/", HTTP_GET, getIndex);
   server.on(UriRegex("^\\/api\\/v1\\/animation\\/([a-zA-Z]+)\\/settings"), HTTP_GET, getAnimationSettings);
   server.on(UriRegex("^\\/api\\/v1\\/animation\\/([a-zA-Z]+)\\/settings"), HTTP_POST, postAnimationSettings);
   server.onNotFound(handleNotFound);
+
+  server.enableCORS(true);
 
   server.begin();
   DBG_OUTPUT_PORT.println("HTTP server started");
