@@ -2,7 +2,7 @@
 typedef Adafruit_NeoPixel NeoPixels;
 
 #include "LedLocations.h"
-#include "Animations.h"
+#include "Animation/Animations.h"
 
 #include "WebService.h"
 

@@ -35,7 +35,6 @@ float clamp(float v, float min, float max);
 
 void updateAnimation(InputParams& inputParams, LedOut leds[]);
 
-void animation_static(const InputParams& inputParams, LedOut& ledOut);
 void animation_breath(const InputParams& inputParams, LedOut& ledOut);
 void animation_radiate(const InputParams& inputParams, LedOut& ledOut);
 

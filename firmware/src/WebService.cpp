@@ -8,7 +8,7 @@
 #include <uri/UriBraces.h>
 #include <uri/UriRegex.h>
 
-#include "Animations.h"
+#include "Animation/Animations.h"
 
 const char* RADIATE_SETTINGS_PAGE = R"~(
 <script type="importmap">
