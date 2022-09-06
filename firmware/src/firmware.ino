@@ -1,5 +1,4 @@
 #include <Adafruit_NeoPixel.h>
-typedef Adafruit_NeoPixel NeoPixels;
 
 #include "LedLocations.h"
 #include "Animation/Animations.h"
@@ -14,6 +13,7 @@ typedef Adafruit_NeoPixel NeoPixels;
 #define PIN 6
 
 NeoPixels pixels(NUM_LEDS, PIN, NEO_GRB + NEO_KHZ800);
+Animations animations(leds, NUM_LEDS);
 
 void setup() {
 
@@ -32,7 +32,8 @@ void setup() {
 
 void loop() {
 
-  updateAnimation(inputParams, leds);
+  // updateAnimation(inputParams, leds);
+  animations.update();
   
   for(int i = 0; i < NUM_LEDS; i++)
   {

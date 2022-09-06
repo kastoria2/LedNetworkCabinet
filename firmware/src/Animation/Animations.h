@@ -4,28 +4,31 @@
 #include <Arduino.h>
 #include "LedLocations.h"
 
-struct InputParams {
+#include "InputParams.h"
 
-  uint32_t startTime_ms;
-  uint32_t currentTime_ms;
-  uint32_t deltaTime_ms;
+#include "Animation.h"
 
-  uint32_t color;
-  uint32_t bgColor;
+class Animations
+{
+public:
 
-  float baseLocation_mm[2];
+  static float distance(const float a[], const float b[]);
+  static float clamp(float v, float min, float max);
 
-  uint8_t speed;
+  Animations(LedOut leds[], int ledCount);
 
-  InputParams() : 
-    startTime_ms(0),
-    currentTime_ms(0),
-    deltaTime_ms(0),
-    color(NeoPixels::Color(0, 0xFF, 0)),
-    bgColor(NeoPixels::Color(0xFF,0,0xFF)),
-    baseLocation_mm {625/2,736/2},
-    speed(128)
-  {}
+  InputParams& getInputParams();
+
+  void update();
+
+private:
+
+  InputParams inputParams;
+  LedOut* leds;
+  int ledCount;
+
+  Animation* currentAnimation;
+  Animation* animations[1];
 };
 
 extern InputParams inputParams;

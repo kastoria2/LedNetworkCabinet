@@ -1,6 +1,18 @@
 #include "Animations.h"
 
+#include "StaticAnimation.h"
+
 InputParams inputParams;
+
+float Animations::distance(const float a[], const float b[])
+{
+  return distance(a, b);
+}
+
+float Animations::clamp(float v, float min, float max)
+{
+  return clamp(v, min, max);
+}
 
 float distance(const float a[], const float b[])
 {
@@ -25,7 +37,21 @@ float clamp(float v, float min, float max)
   return v;
 }
 
-void updateAnimation(InputParams &inputParams, LedOut leds[])
+Animations::Animations(LedOut leds[], int ledCount)
+{
+  this->leds = leds;
+  this->ledCount = ledCount;
+
+  animations[0] = new StaticAnimation();
+  currentAnimation = animations[0];
+}
+
+InputParams& Animations::getInputParams()
+{
+  return inputParams;
+}
+
+void Animations::update()
 {
   // Book keeping for animation parameters
   uint32_t currentMillis = millis();
@@ -33,9 +59,9 @@ void updateAnimation(InputParams &inputParams, LedOut leds[])
   inputParams.deltaTime_ms = currentMillis - inputParams.currentTime_ms;
   inputParams.currentTime_ms = currentMillis;
 
-  for (int i = 0; i < NUM_LEDS; i++)
+  for (int i = 0; i < ledCount; i++)
   {
-    animation_radiate(inputParams, leds[i]);
+    currentAnimation->updateLed(inputParams, leds[i]);
   }
 }
 

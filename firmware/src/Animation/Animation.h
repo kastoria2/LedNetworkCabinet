@@ -1,7 +1,8 @@
 #ifndef __ANIMATION_H__
 #define __ANIMATION_H__
 
-#include "Animations.h"
+#include "LedLocations.h"
+#include "InputParams.h"
 
 class Animation
 {
