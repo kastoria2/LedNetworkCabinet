@@ -28,8 +28,6 @@ private:
   Animation* animations[3];
 };
 
-extern InputParams inputParams;
-
 void updateAnimation(InputParams& inputParams, LedOut leds[]);
 
 // void animation_breath(const InputParams& inputParams, LedOut& ledOut);

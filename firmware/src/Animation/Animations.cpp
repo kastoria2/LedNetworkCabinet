@@ -6,8 +6,6 @@
 
 #include "utils.h"
 
-InputParams inputParams;
-
 Animations::Animations(LedOut leds[], int ledCount)
 {
   this->leds = leds;

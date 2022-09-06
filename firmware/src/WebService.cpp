@@ -140,6 +140,8 @@ StaticJsonDocument<512> doc;
 #define DBG_OUTPUT_PORT Serial
 WebServer server(80);
 
+static Animations* animations;
+
 void updateWebService(void) {
   server.handleClient();
 }
@@ -181,12 +183,12 @@ uint32_t colorFromRequestArguments() {
 }
 
 void updateColor() {
-  inputParams.color = colorFromRequestArguments();
+  animations->getInputParams().color = colorFromRequestArguments();
   server.send(200, "text/plain", "Setting Color");
 }
 
 void updateBgColor() {
-  inputParams.bgColor = colorFromRequestArguments();
+  animations->getInputParams().bgColor = colorFromRequestArguments();
   server.send(200, "text/plain", "Setting Color");
 }
 
@@ -212,11 +214,11 @@ void getRadiateAnimationSettings(DynamicJsonDocument& doc) {
   doc["name"] = "radiate";
 
   DynamicJsonDocument color(256);
-  colorToJson(inputParams.color, color);
+  colorToJson(animations->getInputParams().color, color);
   doc["color"] = color;
 
   DynamicJsonDocument bgColor(256);
-  colorToJson(inputParams.bgColor, bgColor);
+  colorToJson(animations->getInputParams().bgColor, bgColor);
   doc["bgColor"] = bgColor;
 }
 
@@ -252,8 +254,8 @@ void setRadiateAnimationSettings(const String& body)
   DynamicJsonDocument doc(1024);
   deserializeJson(doc, body);
 
-  inputParams.color = jsonToColor(doc["color"]);
-  inputParams.bgColor = jsonToColor(doc["bgColor"]);
+  animations->getInputParams().color = jsonToColor(doc["color"]);
+  animations->getInputParams().bgColor = jsonToColor(doc["bgColor"]);
 }
 
 void postAnimationSettings() {
@@ -275,7 +277,9 @@ void getIndex()
   server.send(200, "text/html", RADIATE_SETTINGS_PAGE);
 }
 
-void initWebService(void) {    
+void initWebService(Animations* _animations) {    
+
+  animations = _animations;
 
   DBG_OUTPUT_PORT.begin(9600);
   DBG_OUTPUT_PORT.setDebugOutput(true);

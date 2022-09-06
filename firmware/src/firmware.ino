@@ -27,7 +27,7 @@ void setup() {
   pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
   pixels.setBrightness(BRIGHTNESS);
 
-  initWebService();
+  initWebService(&animations);
 }
 
 void loop() {
