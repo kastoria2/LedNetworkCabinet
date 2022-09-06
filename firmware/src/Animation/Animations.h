@@ -28,7 +28,7 @@ private:
   int ledCount;
 
   Animation* currentAnimation;
-  Animation* animations[1];
+  Animation* animations[2];
 };
 
 extern InputParams inputParams;

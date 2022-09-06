@@ -1,6 +1,7 @@
 #include "Animations.h"
 
 #include "StaticAnimation.h"
+#include "BreathAnimation.h"
 
 InputParams inputParams;
 
@@ -43,7 +44,9 @@ Animations::Animations(LedOut leds[], int ledCount)
   this->ledCount = ledCount;
 
   animations[0] = new StaticAnimation();
-  currentAnimation = animations[0];
+  animations[1] = new BreathAnimation();
+
+  currentAnimation = animations[1];
 }
 
 InputParams& Animations::getInputParams()
