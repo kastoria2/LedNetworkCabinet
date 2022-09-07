@@ -2,6 +2,7 @@
 #define __ANIMATIONS_H__
 
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include "LedLocations.h"
 
 #include "InputParams.h"
@@ -20,6 +21,8 @@ public:
 
   bool selectAnimation(const String& name);
   void getAnimations(Animation**& animations, int& numAnimations);
+
+  void getJsonAnimations(JsonDocument& doc);
 
   void update();
 

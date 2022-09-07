@@ -42,6 +42,20 @@ void Animations::getAnimations(Animation**& animations, int& numAnimations)
   numAnimations = ANIMATION_COUNT;
 }
 
+void Animations::getJsonAnimations(JsonDocument& doc)
+{
+  doc.clear();
+
+  doc.createNestedArray("Animations");
+  for(int i = 0; i < ANIMATION_COUNT; i++)
+  {
+    StaticJsonDocument<256> animationDoc;
+    animations[i]->toJson(animationDoc);
+
+    doc["Animations"].add(animationDoc);
+  }
+}
+
 void Animations::update()
 {
   // Book keeping for animation parameters

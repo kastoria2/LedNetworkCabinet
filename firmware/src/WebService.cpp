@@ -135,7 +135,8 @@ char ap_password[80] = DEFAULT_PASSWORD;
 #define DEFAULT_HOSTNAME "esp32sd"
 char hostname[80] = DEFAULT_HOSTNAME;
 
-StaticJsonDocument<512> doc;
+#define BUFFER_SIZE 2048
+char JSON_BUFFER[BUFFER_SIZE];
 
 #define DBG_OUTPUT_PORT Serial
 WebServer server(80);
@@ -144,18 +145,6 @@ static Animations* animations;
 
 void updateWebService(void) {
   server.handleClient();
-}
-
-void returnOK() {
-  server.send(200, "text/plain", "");
-}
-
-void returnFail(String msg) {
-  server.send(500, "text/plain", msg + "\r\n");
-}
-
-void printDirectory() {
-  server.send(200, "text/plain", "zens_2022-09-03");
 }
 
 void handleNotFound() {
@@ -192,37 +181,35 @@ void updateBgColor() {
   server.send(200, "text/plain", "Setting Color");
 }
 
-void postTest() {
-  String colorName = server.pathArg(0);
-
-  String bodyTxt = server.arg("plain");
-  server.send(200, "text/plain", colorName + bodyTxt);
-}
-
-void colorToJson(uint32_t source, DynamicJsonDocument& doc){
-  doc.clear();
-
+void colorToJson(uint32_t source, JsonDocument& doc){
   doc["red"] = (source & 0x00ff0000) >> 16;
   doc["green"] = (source & 0x0000ff00) >> 8;
   doc["blue"] = (source & 0x000000ff);
 }
 
-void getRadiateAnimationSettings(DynamicJsonDocument& doc) {
+void getAnimations()
+{
+  StaticJsonDocument<BUFFER_SIZE> doc;
+  animations->getJsonAnimations(doc);
 
-  doc.clear();
+  serializeJson(doc, JSON_BUFFER, BUFFER_SIZE);
+  server.send(200, "text/json", JSON_BUFFER);
+}
+
+void getRadiateAnimationSettings(JsonDocument& doc) {
 
   doc["name"] = "radiate";
 
-  DynamicJsonDocument color(256);
+  StaticJsonDocument<265> color;
   colorToJson(animations->getInputParams().color, color);
   doc["color"] = color;
 
-  DynamicJsonDocument bgColor(256);
+  StaticJsonDocument<265> bgColor;
   colorToJson(animations->getInputParams().bgColor, bgColor);
   doc["bgColor"] = bgColor;
 }
 
-uint32_t jsonToColor(const DynamicJsonDocument& doc)
+uint32_t jsonToColor(const JsonObject& doc)
 {
   uint32_t ret = 0;
   ret += int(doc["red"]) << 16;
@@ -235,13 +222,13 @@ uint32_t jsonToColor(const DynamicJsonDocument& doc)
 void getAnimationSettings() {
   String animationName = server.pathArg(0);
 
-  char buffer[1024];
-  DynamicJsonDocument respBody(1024);
+  StaticJsonDocument<BUFFER_SIZE> doc;
+
   if(animationName.equalsIgnoreCase("radiate"))
   {
-    getRadiateAnimationSettings(respBody);
-    serializeJson(respBody, buffer, 1024);
-    server.send(200, "text/plain", buffer);
+    getRadiateAnimationSettings(doc);
+    serializeJson(doc, JSON_BUFFER, BUFFER_SIZE);
+    server.send(200, "text/plain", JSON_BUFFER);
   }
   else
   {
@@ -311,8 +298,9 @@ void initWebService(Animations* _animations) {
   }
   
   server.on("/", HTTP_GET, getIndex);
-  server.on(UriRegex("^\\/api\\/v1\\/animation\\/([a-zA-Z]+)\\/settings"), HTTP_GET, getAnimationSettings);
-  server.on(UriRegex("^\\/api\\/v1\\/animation\\/([a-zA-Z]+)\\/settings"), HTTP_POST, postAnimationSettings);
+  server.on(UriRegex("^\\/api\\/v1\\/animations$"), HTTP_GET, getAnimations);
+  server.on(UriRegex("^\\/api\\/v1\\/animations\\/([a-zA-Z]+)"), HTTP_GET, getAnimationSettings);
+  server.on(UriRegex("^\\/api\\/v1\\/animations\\/([a-zA-Z]+)"), HTTP_POST, postAnimationSettings);
   server.onNotFound(handleNotFound);
 
   server.enableCORS(true);
