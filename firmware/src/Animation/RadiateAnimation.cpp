@@ -7,7 +7,7 @@ float origin[] = {0, 0};
 float lowerRight[] = {625, 736};
 float maxDist = distance(origin, lowerRight);
 
-RadiateAnimation::RadiateAnimation()
+RadiateAnimation::RadiateAnimation() : Animation("Radiate")
 {}
 
 void RadiateAnimation::updateLed(const InputParams& inputParams, LedOut& ledOut)

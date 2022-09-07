@@ -1,6 +1,6 @@
 #include "StaticAnimation.h"
 
-StaticAnimation::StaticAnimation()
+StaticAnimation::StaticAnimation() : Animation("Static")
 {}
 
 void StaticAnimation::updateLed(const InputParams& inputParams, LedOut& ledOut)

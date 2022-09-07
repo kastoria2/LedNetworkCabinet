@@ -1,6 +1,6 @@
 #include "BreathAnimation.h"
 
-BreathAnimation::BreathAnimation()
+BreathAnimation::BreathAnimation() : Animation("Breath")
 {}
 
 void BreathAnimation::updateLed(const InputParams& inputParams, LedOut& ledOut)

@@ -23,6 +23,25 @@ InputParams& Animations::getInputParams()
   return inputParams;
 }
 
+bool Animations::selectAnimation(const String& name)
+{
+  for(Animation* animation : this->animations)
+  {
+    if(animation->getDisplayName().equalsIgnoreCase(name))
+    {
+      this->currentAnimation = animation;
+      return true;
+    }
+  }
+  return false;
+}
+
+void Animations::getAnimations(Animation**& animations, int& numAnimations)
+{
+  animations = this->animations;
+  numAnimations = ANIMATION_COUNT;
+}
+
 void Animations::update()
 {
   // Book keeping for animation parameters

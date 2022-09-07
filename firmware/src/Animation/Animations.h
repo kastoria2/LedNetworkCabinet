@@ -8,6 +8,8 @@
 
 #include "Animation.h"
 
+#define ANIMATION_COUNT 3
+
 class Animations
 {
 public:
@@ -15,6 +17,9 @@ public:
   Animations(LedOut leds[], int ledCount);
 
   InputParams& getInputParams();
+
+  bool selectAnimation(const String& name);
+  void getAnimations(Animation**& animations, int& numAnimations);
 
   void update();
 
@@ -25,7 +30,7 @@ private:
   int ledCount;
 
   Animation* currentAnimation;
-  Animation* animations[3];
+  Animation* animations[ANIMATION_COUNT];
 };
 
 void updateAnimation(InputParams& inputParams, LedOut leds[]);
