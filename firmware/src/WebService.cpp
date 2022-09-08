@@ -35,14 +35,14 @@ const char* RADIATE_SETTINGS_PAGE = R"~(
     <div id="app">
 
         <div class="container">
-            <div class="row" v-if="radiateSettings">
-                <div class="col-sm ">{{radiateSettings.name}}</div>
+            <div class="row" v-if="status">
+                <div class="col-sm "><div class="d-flex align-items-stretch">{{status.Animation}}</div></div>
                 <div class="col-sm">Color: <input class="form-control" type="color" v-model="tmpColor" /></div>
                 <div class="col-sm">bgColor: <input class="form-control" type="color" v-model="tmpBgColor" /></div>
-                <button class="col-sm" @click="saveSettings">Save</button>
+                <button class="col-sm" @click="saveStatus">Save</button>
             </div>
             <div class="row" v-else>
-                <button class="col col-sm-12" @click="fetchTest">Load settings</button>
+                <div class="col col-sm-12">Loading...</div>
             </div>
         </div>
     </div>
@@ -79,41 +79,44 @@ const char* RADIATE_SETTINGS_PAGE = R"~(
         data() {
             return {
                 message: 'Hello Vue!',
-                radiateSettings: null,
+                status: null,
                 tmpColor: "#FF0000",
                 tmpBgColor: "#00FF00"
             }
         },
+        mounted() {
+            this.fetchStatus();
+        },
         methods: {
-            async fetchTest() {
+            async fetchStatus() {
 
-                const response = await fetch('http://192.168.0.232/api/v1/animation/radiate/settings');
+                const response = await fetch('http://192.168.0.232/api/v1/status');
                 const data = await response.json();
-                this.radiateSettings = data;
+                this.status = data;
 
                 this.tmpColor = rgbToHex(
-                    this.radiateSettings.color["red"],
-                    this.radiateSettings.color["green"],
-                    this.radiateSettings.color["blue"]);
+                    this.status.Settings.Global.color.red,
+                    this.status.Settings.Global.color.green,
+                    this.status.Settings.Global.color.blue);
 
                 this.tmpBgColor = rgbToHex(
-                    this.radiateSettings.bgColor["red"],
-                    this.radiateSettings.bgColor["green"],
-                    this.radiateSettings.bgColor["blue"]
+                    this.status.Settings.Global.bgColor.red,
+                    this.status.Settings.Global.bgColor.green,
+                    this.status.Settings.Global.bgColor.blue
                 );
             },
-            async saveSettings() {
-                this.radiateSettings.color = hexToRgb(this.tmpColor);
-                this.radiateSettings.bgColor = hexToRgb(this.tmpBgColor);
+            async saveStatus() {
+                this.status.Settings.Global.color = hexToRgb(this.tmpColor);
+                this.status.Settings.Global.bgColor = hexToRgb(this.tmpBgColor);
 
                 const response = await fetch(
-                    'http://192.168.0.232/api/v1/animation/radiate/settings', {
+                    'http://192.168.0.232/api/v1/status', {
                     method: 'POST',
-                    body: JSON.stringify(this.radiateSettings)
+                    body: JSON.stringify(this.status)
                 }
                 );
 
-                this.fetchTest();
+                this.fetchStatus();
             }
         }
     }).mount('#app')
@@ -196,9 +199,7 @@ void getAnimations()
   server.send(200, "text/json", JSON_BUFFER);
 }
 
-void getRadiateAnimationSettings(JsonDocument& doc) {
-
-  doc["name"] = "radiate";
+void getInputParameters(JsonObject& doc) {
 
   StaticJsonDocument<265> color;
   colorToJson(animations->getInputParams().color, color);
@@ -219,38 +220,67 @@ uint32_t jsonToColor(const JsonObject& doc)
   return ret;
 }
 
-void getAnimationSettings() {
+void getAnimation() {
   String animationName = server.pathArg(0);
 
   StaticJsonDocument<BUFFER_SIZE> doc;
 
-  if(animationName.equalsIgnoreCase("radiate"))
-  {
-    getRadiateAnimationSettings(doc);
-    serializeJson(doc, JSON_BUFFER, BUFFER_SIZE);
-    server.send(200, "text/plain", JSON_BUFFER);
-  }
-  else
-  {
-    server.send(404, "text/plain", "Unknown animation: " + animationName);
-  }
+  JsonObject globalSettings = doc.createNestedObject("Global");
+  JsonObject animationSettings = doc.createNestedObject("Animation");
+
+  getInputParameters(globalSettings);
+
+  serializeJson(doc, JSON_BUFFER, BUFFER_SIZE);
+  server.send(200, "text/json", JSON_BUFFER);
+
+  // if(animationName.equalsIgnoreCase("radiate"))
+  // {
+  //   getRadiateAnimationSettings(doc);
+  //   serializeJson(doc, JSON_BUFFER, BUFFER_SIZE);
+  //   server.send(200, "text/json", JSON_BUFFER);
+  // }
+  // else
+  // {
+  //   server.send(404, "text/plain", "Unknown animation: " + animationName);
+  // }
 }
 
-void setRadiateAnimationSettings(const String& body)
+void getStatus()
 {
-  DynamicJsonDocument doc(1024);
-  deserializeJson(doc, body);
+  StaticJsonDocument<1024> doc;
+  doc["Animation"] = animations->getCurrentAnimation()->getDisplayName().c_str();
+  JsonObject settingsObj = doc.createNestedObject("Settings");
+  JsonObject globalSettingsObj = settingsObj.createNestedObject("Global");
 
-  animations->getInputParams().color = jsonToColor(doc["color"]);
-  animations->getInputParams().bgColor = jsonToColor(doc["bgColor"]);
+  getInputParameters(globalSettingsObj);
+
+  serializeJson(doc, JSON_BUFFER, BUFFER_SIZE);
+  server.send(200, "text/json", JSON_BUFFER);
 }
 
-void postAnimationSettings() {
+void setInputParams(const JsonObject& jsonObj)
+{
+  animations->getInputParams().color = jsonToColor(jsonObj["color"]);
+  animations->getInputParams().bgColor = jsonToColor(jsonObj["bgColor"]);
+}
+
+void postStatus()
+{
+  StaticJsonDocument<2048> doc;
+  deserializeJson(doc, server.arg("plain"));
+  setInputParams(doc["Settings"]["Global"]);
+
+  server.send(200);
+}
+
+void postAnimation() {
   String animationName = server.pathArg(0);
 
   if(animationName.equalsIgnoreCase("radiate"))
   {
-    setRadiateAnimationSettings(server.arg("plain"));
+    StaticJsonDocument<1024> doc;
+    deserializeJson(doc, server.arg("plain"));
+    setInputParams(doc["Settings"]["Global"]);
     server.send(200);
   }
   else
@@ -298,9 +328,11 @@ void initWebService(Animations* _animations) {
   }
   
   server.on("/", HTTP_GET, getIndex);
+  server.on("/api/v1/status", HTTP_GET, getStatus);
+  server.on("/api/v1/status", HTTP_POST, postStatus);
   server.on(UriRegex("^\\/api\\/v1\\/animations$"), HTTP_GET, getAnimations);
-  server.on(UriRegex("^\\/api\\/v1\\/animations\\/([a-zA-Z]+)"), HTTP_GET, getAnimationSettings);
-  server.on(UriRegex("^\\/api\\/v1\\/animations\\/([a-zA-Z]+)"), HTTP_POST, postAnimationSettings);
+  server.on(UriRegex("^\\/api\\/v1\\/animations\\/([a-zA-Z]+)"), HTTP_GET, getAnimation);
+  server.on(UriRegex("^\\/api\\/v1\\/animations\\/([a-zA-Z]+)"), HTTP_POST, postAnimation);
   server.onNotFound(handleNotFound);
 
   server.enableCORS(true);

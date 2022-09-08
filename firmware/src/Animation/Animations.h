@@ -21,6 +21,7 @@ public:
 
   bool selectAnimation(const String& name);
   void getAnimations(Animation**& animations, int& numAnimations);
+  Animation* getCurrentAnimation();
 
   void getJsonAnimations(JsonDocument& doc);
 

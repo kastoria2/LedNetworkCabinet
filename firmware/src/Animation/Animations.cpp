@@ -36,6 +36,11 @@ bool Animations::selectAnimation(const String& name)
   return false;
 }
 
+Animation* Animations::getCurrentAnimation()
+{
+  return currentAnimation;
+}
+
 void Animations::getAnimations(Animation**& animations, int& numAnimations)
 {
   animations = this->animations;
