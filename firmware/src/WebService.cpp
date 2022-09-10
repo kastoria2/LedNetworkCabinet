@@ -36,7 +36,7 @@ const char* RADIATE_SETTINGS_PAGE = R"~(
 
         <div class="container">
             <div class="row" v-if="animationsView">
-                <select class="form-select">
+                <select class="form-select" id="animationSelectList">
                     <option v-for="animation in animationsView" :key="animation.name" :selected="animation.selected" :value="animation.index">{{animation.name}}</option>
                   </select>
             </div>
@@ -134,6 +134,9 @@ const char* RADIATE_SETTINGS_PAGE = R"~(
             async saveStatus() {
                 this.status.Settings.Global.color = hexToRgb(this.tmpColor);
                 this.status.Settings.Global.bgColor = hexToRgb(this.tmpBgColor);
+
+                let selectedAnimationIndex = document.getElementById("animationSelectList").value;
+                this.status.Animation = this.animationsView[selectedAnimationIndex].name;
 
                 const response = await fetch(
                     'http://192.168.0.232/api/v1/status', {
@@ -300,11 +303,17 @@ void setInputParams(const JsonObject& jsonObj)
   animations->getInputParams().bgColor = jsonToColor(jsonObj["bgColor"]);
 }
 
+void setAnimation(const String& name)
+{
+  animations->selectAnimation(name);
+}
+
 void postStatus()
 {
   StaticJsonDocument<2048> doc;
   deserializeJson(doc, server.arg("plain"));
   setInputParams(doc["Settings"]["Global"]);
+  setAnimation(doc["Animation"]);
 
   server.send(200);
 }
