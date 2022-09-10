@@ -35,6 +35,12 @@ const char* RADIATE_SETTINGS_PAGE = R"~(
     <div id="app">
 
         <div class="container">
+            <div class="row" v-if="animationsView">
+                <select class="form-select">
+                    <option v-for="animation in animationsView" :key="animation.name" :selected="animation.selected" :value="animation.index">{{animation.name}}</option>
+                  </select>
+            </div>
+
             <div class="row" v-if="status">
                 <div class="col-sm "><div class="d-flex align-items-stretch">{{status.Animation}}</div></div>
                 <div class="col-sm">Color: <input class="form-control" type="color" v-model="tmpColor" /></div>
@@ -58,7 +64,7 @@ const char* RADIATE_SETTINGS_PAGE = R"~(
     import { createApp } from 'vue'
 
     function componentToHex(c) {
-        var hex = c.toString(16);
+        let hex = c.toString(16);
         return hex.length == 1 ? "0" + hex : hex;
     }
 
@@ -67,7 +73,7 @@ const char* RADIATE_SETTINGS_PAGE = R"~(
     }
 
     function hexToRgb(hex) {
-        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? {
             red: parseInt(result[1], 16),
             green: parseInt(result[2], 16),
@@ -80,14 +86,34 @@ const char* RADIATE_SETTINGS_PAGE = R"~(
             return {
                 message: 'Hello Vue!',
                 status: null,
+                animationsView: null,
                 tmpColor: "#FF0000",
                 tmpBgColor: "#00FF00"
             }
         },
-        mounted() {
-            this.fetchStatus();
+        async mounted() {
+            await this.fetchAnimations();
+            await this.fetchStatus();
         },
         methods: {
+            async fetchAnimations() {
+                const response = await fetch('http://192.168.0.232/api/v1/animations');
+                const animationsJson = await response.json();
+
+                let tmpAnimations = [];
+                for(let i = 0; i < animationsJson["Animations"].length; i++)
+                {
+                    let tmpAnimation = animationsJson["Animations"][i];
+                    
+                    tmpAnimations.push({
+                        index: i,
+                        selected: false,
+                        name: tmpAnimation.name
+                    });
+                }
+
+                this.animationsView = tmpAnimations;
+            },
             async fetchStatus() {
 
                 const response = await fetch('http://192.168.0.232/api/v1/status');
@@ -118,7 +144,17 @@ const char* RADIATE_SETTINGS_PAGE = R"~(
 
                 this.fetchStatus();
             }
-        }
+        },
+        watch: {
+            'status': {
+                handler: function (newStatus) {
+                    for(let animation of this.animationsView)
+                    {
+                        animation.selected = (animation.name === newStatus.Animation);
+                    }
+                }
+            },
+        },
     }).mount('#app')
 </script>
 )~";
