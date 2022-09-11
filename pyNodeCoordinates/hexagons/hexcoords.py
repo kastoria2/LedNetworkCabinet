@@ -106,7 +106,7 @@ class HexPanel(QObject):
 
         self.ledStrip = self.generateLedStrip()
 
-        initAnimation(TwinkleAnimation())
+        initAnimation(TwinkleAnimation(self))
 
     @Slot(result=float)
     def width(self):

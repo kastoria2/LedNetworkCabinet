@@ -90,11 +90,12 @@ class InputParams(object):
 
 class Animation():
 
-    def __init__(self):
-        pass
+    def __init__(self, hexPanel):
+        self.hexPanel = hexPanel
 
-    def updateLed(self, inputParams: InputParams, ledOut: LedOut):
-        ledOut.color = inputParams.color
+    def update(self, inputParams: InputParams):
+        for led in self.hexPanel.ledStrip:
+            led.color = inputParams.color
 
 
 GLOBAL_INPUT_PARAMS = InputParams()
@@ -131,105 +132,108 @@ def updateAnimation(ledStrip: List[LedOut], currentTime_ms: int = None):
 
     global GLOBAL_ANIMATION
 
-    for led in ledStrip:
-        GLOBAL_ANIMATION.updateLed(GLOBAL_INPUT_PARAMS, led)
+    GLOBAL_ANIMATION.update(GLOBAL_INPUT_PARAMS)
 
 
 class StaticAnimation(Animation):
-
-    def updateLed(self, inputParams: InputParams, ledOut: LedOut):
-        '''
-        'Animation' that just displays a single, static color.
-        '''
-
-        ledOut.color = inputParams.color
+    pass
 
 class BreathAnimation(Animation):
 
-    def updateLed(self, inputParams: InputParams, ledOut: LedOut):
+    def update(self, inputParams: InputParams):
 
-        CYCLE_PERIOD = 10000
+        for ledOut in self.hexPanel.ledStrip:
 
-        # Max period is 5s for a breath cycle.
-        period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
+            CYCLE_PERIOD = 10000
 
-        cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
+            # Max period is 5s for a breath cycle.
+            period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
 
-        absPercentage = (abs((period/2.0) - cycleTime) / period) * 2
+            cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
 
-        red = (inputParams.color & 0xff0000) >> 16
-        green = (inputParams.color & 0x00ff00) >> 8
-        blue = inputParams.color & 0x0000ff
+            absPercentage = (abs((period/2.0) - cycleTime) / period) * 2
 
-        # print(f"period: {period}, cycleTime: {cycleTime}, absPercentage: {absPercentage}, red: {red}, green: {green}, blue: {blue}")
+            red = (inputParams.color & 0xff0000) >> 16
+            green = (inputParams.color & 0x00ff00) >> 8
+            blue = inputParams.color & 0x0000ff
 
-        red = int(red * absPercentage)
-        green = int(green * absPercentage)
-        blue = int(blue * absPercentage)
+            # print(f"period: {period}, cycleTime: {cycleTime}, absPercentage: {absPercentage}, red: {red}, green: {green}, blue: {blue}")
 
-        ledOut.color = (red << 16) + (green << 8) + blue
+            red = int(red * absPercentage)
+            green = int(green * absPercentage)
+            blue = int(blue * absPercentage)
+
+            ledOut.color = (red << 16) + (green << 8) + blue
 
 class IndexBreath(Animation):
 
-    def updateLed(self, inputParams: InputParams, ledOut: LedOut):
-        CYCLE_PERIOD = 20000
+    def update(self, inputParams: InputParams):
 
-        period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
-        cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
-        absPercentage = (cycleTime / period)
+        for ledOut in self.hexPanel.ledStrip:
 
-        if (ledOut.index / 98.0) <= absPercentage:
-            ledOut.color = inputParams.color
-        else:
-            ledOut.color = 0
+            CYCLE_PERIOD = 20000
+
+            period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
+            cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
+            absPercentage = (cycleTime / period)
+
+            if (ledOut.index / 98.0) <= absPercentage:
+                ledOut.color = inputParams.color
+            else:
+                ledOut.color = 0
 
 
 class RadiateAnimation(Animation):
 
-    def updateLed(self, inputParams: InputParams, ledOut: LedOut):
-        CYCLE_PERIOD = 5000
+    def update(self, inputParams: InputParams):
 
-        period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
-        cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
-        absPercentage = (cycleTime / period)
+        for ledOut in self.hexPanel.ledStrip:
 
-        maxDist = distance([0, 0], [625, 736])
-        ledDist = distance(inputParams.baseLocation_mm, ledOut.position_mm)
-        ledPercent = ledDist / maxDist
+            CYCLE_PERIOD = 5000
 
-        red = (inputParams.color & 0xff0000) >> 16
-        green = (inputParams.color & 0x00ff00) >> 8
-        blue = inputParams.color & 0x0000ff
+            period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
+            cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
+            absPercentage = (cycleTime / period)
 
-        scaleFactor = clamp((1 - math.fabs(absPercentage - ledPercent) * 10), 0, 1.0)
+            maxDist = distance([0, 0], [625, 736])
+            ledDist = distance(inputParams.baseLocation_mm, ledOut.position_mm)
+            ledPercent = ledDist / maxDist
 
-        bgRed = (inputParams.bgColor & 0xff0000) >> 16
-        bgGreen = (inputParams.bgColor & 0x00ff00) >> 8
-        bgBlue = (inputParams.bgColor & 0x0000ff)
+            red = (inputParams.color & 0xff0000) >> 16
+            green = (inputParams.color & 0x00ff00) >> 8
+            blue = inputParams.color & 0x0000ff
 
-        red = int(blend(red, bgRed, scaleFactor))
-        green = int(blend(green, bgGreen, scaleFactor))
-        blue = int(blend(blue, bgBlue, scaleFactor))
+            scaleFactor = clamp((1 - math.fabs(absPercentage - ledPercent) * 10), 0, 1.0)
 
-        ledOut.color = (red << 16) + (green << 8) + blue
+            bgRed = (inputParams.bgColor & 0xff0000) >> 16
+            bgGreen = (inputParams.bgColor & 0x00ff00) >> 8
+            bgBlue = (inputParams.bgColor & 0x0000ff)
+
+            red = int(blend(red, bgRed, scaleFactor))
+            green = int(blend(green, bgGreen, scaleFactor))
+            blue = int(blend(blue, bgBlue, scaleFactor))
+
+            ledOut.color = (red << 16) + (green << 8) + blue
 
 class BasePointAnimation(Animation):
 
-    def updateLed(self, inputParams: InputParams, ledOut: LedOut):
+    def update(self, inputParams: InputParams):
 
-        red = (inputParams.color & 0xff0000) >> 16
-        green = (inputParams.color & 0x00ff00) >> 8
-        blue = inputParams.color & 0x0000ff
+        for ledOut in self.hexPanel.ledStrip:
 
-        ledDist = distance(inputParams.baseLocation_mm, ledOut.position_mm)
-        maxDist = 60
+            red = (inputParams.color & 0xff0000) >> 16
+            green = (inputParams.color & 0x00ff00) >> 8
+            blue = inputParams.color & 0x0000ff
 
-        if ledOut.index == 45:
-            pass
+            ledDist = distance(inputParams.baseLocation_mm, ledOut.position_mm)
+            maxDist = 60
 
-        ledOut.color = 0
-        if ledDist < maxDist:
-            ledOut.color = inputParams.color
+            if ledOut.index == 45:
+                pass
+
+            ledOut.color = 0
+            if ledDist < maxDist:
+                ledOut.color = inputParams.color
 
 class TwinkleAnimation(Animation):
 
@@ -246,9 +250,9 @@ class TwinkleAnimation(Animation):
             percent = float(time_ms - self.startTime_ms) / self.duration_ms
             return clamp(percent, 0.0, 1.0)
 
-    def __init__(self, twinkleCount: int = 10):
+    def __init__(self, hexPanel, twinkleCount: int = 10):
 
-        super(TwinkleAnimation, self).__init__()
+        super(TwinkleAnimation, self).__init__(hexPanel)
 
         self.twinkleCount = twinkleCount
         self.twinkleData = []
@@ -269,16 +273,19 @@ class TwinkleAnimation(Animation):
                 )
             )
 
-    def updateLed(self, inputParams: InputParams, ledOut: LedOut):
-        super(TwinkleAnimation, self).updateLed(inputParams, ledOut)
+    def update(self, inputParams: InputParams):
+
         self.updateTwinkleData(inputParams)
 
-        for twinkle in self.twinkleData:
+        for ledOut in self.hexPanel.ledStrip:
+            ledOut.color = inputParams.color
 
-            if twinkle.index != ledOut.index:
-                continue
+            for twinkle in self.twinkleData:
 
-            lifePercent = twinkle.lifePercent(inputParams.currentTime_ms)
-            lifeDistance = 1.0 - (2*math.fabs(0.5 - lifePercent))
+                if twinkle.index != ledOut.index:
+                    continue
 
-            ledOut.color = blendComponents(inputParams.bgColor, inputParams.color, lifeDistance)
+                lifePercent = twinkle.lifePercent(inputParams.currentTime_ms)
+                lifeDistance = 1.0 - (2*math.fabs(0.5 - lifePercent))
+
+                ledOut.color = blendComponents(inputParams.bgColor, inputParams.color, lifeDistance)
