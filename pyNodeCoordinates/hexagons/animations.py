@@ -1,10 +1,11 @@
 import math
+import random
 import time
 from typing import List
 
 from PySide2.QtCore import QObject, Property, Signal
 
-from .utils import blend
+from .utils import blend, clamp, distance, blendComponents
 
 class LedOut(QObject):
     '''
@@ -183,24 +184,6 @@ class IndexBreath(Animation):
             ledOut.color = 0
 
 
-def distance(v1, v2):
-    delta = [
-        v2[0] - v1[0],
-        v2[1] - v1[1]
-    ]
-
-    return math.sqrt(delta[0]**2 + delta[1]**2)
-
-
-def clamp(value, lower, upper):
-    if value < lower:
-        return lower
-
-    if value > upper:
-        return upper
-
-    return value
-
 class RadiateAnimation(Animation):
 
     def updateLed(self, inputParams: InputParams, ledOut: LedOut):
@@ -247,3 +230,55 @@ class BasePointAnimation(Animation):
         ledOut.color = 0
         if ledDist < maxDist:
             ledOut.color = inputParams.color
+
+class TwinkleAnimation(Animation):
+
+    class TwinkleData():
+        def __init__(self, index: int, startTime_ms: int, duration_ms: int):
+            self.index = index
+            self.startTime_ms = startTime_ms
+            self.duration_ms = duration_ms
+
+        def endTime_ms(self):
+            return self.startTime_ms + self.duration_ms
+
+        def lifePercent(self, time_ms):
+            percent = float(time_ms - self.startTime_ms) / self.duration_ms
+            return clamp(percent, 0.0, 1.0)
+
+    def __init__(self, twinkleCount: int = 10):
+
+        super(TwinkleAnimation, self).__init__()
+
+        self.twinkleCount = twinkleCount
+        self.twinkleData = []
+
+    def updateTwinkleData(self, inputParams: InputParams):
+
+        # Remove expired twinkles
+        self.twinkleData = list(filter(lambda d: d.endTime_ms() >= inputParams.currentTime_ms, self.twinkleData))
+
+        # Populate new twinkles
+        while len(self.twinkleData) < self.twinkleCount:
+
+            self.twinkleData.append(
+                TwinkleAnimation.TwinkleData(
+                    random.randint(0, 97),
+                    inputParams.currentTime_ms, 
+                    random.randint(2000, 10000)
+                )
+            )
+
+    def updateLed(self, inputParams: InputParams, ledOut: LedOut):
+        super(TwinkleAnimation, self).updateLed(inputParams, ledOut)
+        self.updateTwinkleData(inputParams)
+
+        for twinkle in self.twinkleData:
+
+            if twinkle.index != ledOut.index:
+                continue
+
+            lifePercent = twinkle.lifePercent(inputParams.currentTime_ms)
+            lifeDistance = 1.0 - (2*math.fabs(0.5 - lifePercent))
+
+            ledOut.color = blendComponents(inputParams.bgColor, inputParams.color, lifeDistance)

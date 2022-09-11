@@ -1,12 +1,11 @@
 import math
 
-from .utils import \
-    hexagonHeight, rotateVector2d
+from .utils import hexagonHeight, rotateVector2d
 from typing import List
 from PySide2.QtCore import QObject, Property, Signal, Slot
 
 from .animations import initAnimation, updateAnimation, LedOut
-from .animations import StaticAnimation, BreathAnimation, RadiateAnimation, BasePointAnimation
+from .animations import StaticAnimation, BreathAnimation, RadiateAnimation, BasePointAnimation, TwinkleAnimation
 
 
 class Hexagon(QObject):
@@ -107,7 +106,7 @@ class HexPanel(QObject):
 
         self.ledStrip = self.generateLedStrip()
 
-        initAnimation(RadiateAnimation())
+        initAnimation(TwinkleAnimation())
 
     @Slot(result=float)
     def width(self):
