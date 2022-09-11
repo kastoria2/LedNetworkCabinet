@@ -1,8 +1,7 @@
 import math
 
 from .utils import \
-    hexagonHeight, rotateVector2d, \
-    um2mm, mm2um
+    hexagonHeight, rotateVector2d
 from typing import List
 from PySide2.QtCore import QObject, Property, Signal, Slot
 
@@ -215,17 +214,17 @@ class HexPanel(QObject):
         in the logical model.
         '''
 
-        ledVertices_um = [[mm2um(v[0]), mm2um(v[1])]
+        ledVertices_mm = [[v[0], v[1]]
                           for v in self.getLedVertices()]
 
         # Sort the LEDs by Y coordinate into rows
-        ledVertices_um.sort(key=lambda l: l[1])
+        ledVertices_mm.sort(key=lambda l: l[1])
 
-        minY = min([vert[1] for vert in ledVertices_um])
+        minY = min([vert[1] for vert in ledVertices_mm])
 
         rows = []
-        for vert in ledVertices_um:
-            rowIndex = round((vert[1] - minY) / (hexagonHeight(mm2um(self.radius_mm)) / 2))
+        for vert in ledVertices_mm:
+            rowIndex = round((vert[1] - minY) / (hexagonHeight(self.radius_mm) / 2))
 
             # Ensure there are indices to store into.
             while len(rows) <= rowIndex:
@@ -235,7 +234,7 @@ class HexPanel(QObject):
 
         # Sort the rows by X value alternating decreasing and increasing.
         for i in range(len(rows)):
-            rows[i].sort(key=lambda lo: lo._position_um[0], reverse=((i+1) % 2) == 0)
+            rows[i].sort(key=lambda lo: lo._position_mm[0], reverse=((i+1) % 2) == 0)
 
         # Flatten the results.
         result = []
@@ -261,7 +260,7 @@ class HexPanel(QObject):
         for i in range(len(self.ledStrip)):
             led = self.ledStrip[i]
 
-            buffer.append(f"LedOut {{{i}, {{{um2mm(led.position_um[0])},{um2mm(led.position_um[1])}}}, NeoPixels::Color(0,0,0)}},")
+            buffer.append(f"LedOut {{{i}, {{{led.position_mm[0]},{led.position_mm[1]}}}, NeoPixels::Color(0,0,0)}},")
 
         buffer.append("};")
 

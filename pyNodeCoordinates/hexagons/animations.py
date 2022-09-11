@@ -4,7 +4,7 @@ from typing import List
 
 from PySide2.QtCore import QObject, Property, Signal
 
-from .utils import mm2um, blend
+from .utils import blend
 
 class LedOut(QObject):
     '''
@@ -15,29 +15,29 @@ class LedOut(QObject):
     def __init__(
             self, parent: QObject = None,
             index: int = -1,
-            position_um: List[List[float]] = [0, 0]):
+            position_mm: List[List[float]] = [0, 0]):
 
         QObject.__init__(self, parent)
 
-        self._finalColor = 0
+        self._color = 0
 
         self._index = index
-        self._position_um = position_um
+        self._position_mm = position_mm
 
     def setFinalColor(self, value):
-        self._finalColor = value
-        self.finalColorChanged.emit()
+        self._color = value
+        self.colorChanged.emit()
 
     def setIndex(self, value):
         self._index = value
         self.indexChanged.emit()
 
-    finalColorChanged = Signal()
-    finalColor = Property(
+    colorChanged = Signal()
+    color = Property(
         "float",
-        fget=lambda self: self._finalColor,
+        fget=lambda self: self._color,
         fset=setFinalColor,
-        notify=finalColorChanged)
+        notify=colorChanged)
 
     indexChanged = Signal()
     index = Property(
@@ -47,9 +47,9 @@ class LedOut(QObject):
         notify=indexChanged)
 
     positionChanged = Signal()
-    position_um = Property(
+    position_mm = Property(
         "QVariantList",
-        fget=lambda self: self._position_um,
+        fget=lambda self: self._position_mm,
         notify=positionChanged)
 
 
@@ -74,13 +74,13 @@ class InputParams(object):
         self.deltaTime_ms = 0
 
         # Basic color for the animation
-        self.baseColor = 0x000000
+        self.color = 0x000000
 
         # If there is an accent color used in the animation.
-        self.accentColor = 0x000000
+        self.bgColor = 0x000000
 
         # Generic location.  Useful for generating waves or gradients
-        self.baseLocation_um = [0, 0]
+        self.baseLocation_mm = [0, 0]
 
         # Some generic indicator of the speed for the anmitaion.
         # e.g. 'breath' could be faster or slower based on this
@@ -100,9 +100,9 @@ def initAnimation(animationMethod, currentTime_ms: int = None):
     global GLOBAL_INPUT_PARAMS
     GLOBAL_INPUT_PARAMS.reset(currentTime_ms)
 
-    GLOBAL_INPUT_PARAMS.baseColor = 0xff00ff
-    GLOBAL_INPUT_PARAMS.accentColor = 0x00ff00
-    GLOBAL_INPUT_PARAMS.baseLocation_um = [mm2um(625) / 2, mm2um(736) / 2]
+    GLOBAL_INPUT_PARAMS.color = 0xff00ff
+    GLOBAL_INPUT_PARAMS.bgColor = 0x00ff00
+    GLOBAL_INPUT_PARAMS.baseLocation_mm = [625 / 2, 736 / 2]
 
     global GLOBAL_ANIMATION_METHOD
     GLOBAL_ANIMATION_METHOD = animationMethod
@@ -131,7 +131,7 @@ def static(ledOut: LedOut, inputParams: InputParams):
     'Animation' that just displays a single, static color.
     '''
 
-    ledOut.finalColor = inputParams.baseColor
+    ledOut.color = inputParams.color
 
 
 def breath(ledOut: LedOut, inputParams: InputParams):
@@ -145,9 +145,9 @@ def breath(ledOut: LedOut, inputParams: InputParams):
 
     absPercentage = (abs((period/2.0) - cycleTime) / period) * 2
 
-    red = (inputParams.baseColor & 0xff0000) >> 16
-    green = (inputParams.baseColor & 0x00ff00) >> 8
-    blue = inputParams.baseColor & 0x0000ff
+    red = (inputParams.color & 0xff0000) >> 16
+    green = (inputParams.color & 0x00ff00) >> 8
+    blue = inputParams.color & 0x0000ff
 
     # print(f"period: {period}, cycleTime: {cycleTime}, absPercentage: {absPercentage}, red: {red}, green: {green}, blue: {blue}")
 
@@ -155,7 +155,7 @@ def breath(ledOut: LedOut, inputParams: InputParams):
     green = int(green * absPercentage)
     blue = int(blue * absPercentage)
 
-    ledOut.finalColor = (red << 16) + (green << 8) + blue
+    ledOut.color = (red << 16) + (green << 8) + blue
 
 
 def indexBreath(ledOut: LedOut, inputParams: InputParams):
@@ -166,9 +166,9 @@ def indexBreath(ledOut: LedOut, inputParams: InputParams):
     absPercentage = (cycleTime / period)
 
     if (ledOut.index / 98.0) <= absPercentage:
-        ledOut.finalColor = inputParams.baseColor
+        ledOut.color = inputParams.color
     else:
-        ledOut.finalColor = 0
+        ledOut.color = 0
 
 
 def distance(v1, v2):
@@ -197,39 +197,39 @@ def radiate(ledOut: LedOut, inputParams: InputParams):
     cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
     absPercentage = (cycleTime / period)
 
-    maxDist = distance([0, 0], [mm2um(625), mm2um(736)])
-    ledDist = distance(inputParams.baseLocation_um, ledOut.position_um)
+    maxDist = distance([0, 0], [625, 736])
+    ledDist = distance(inputParams.baseLocation_mm, ledOut.position_mm)
     ledPercent = ledDist / maxDist
 
-    red = (inputParams.baseColor & 0xff0000) >> 16
-    green = (inputParams.baseColor & 0x00ff00) >> 8
-    blue = inputParams.baseColor & 0x0000ff
+    red = (inputParams.color & 0xff0000) >> 16
+    green = (inputParams.color & 0x00ff00) >> 8
+    blue = inputParams.color & 0x0000ff
 
     scaleFactor = clamp((1 - math.fabs(absPercentage - ledPercent) * 10), 0, 1.0)
 
-    bgRed = (inputParams.accentColor & 0xff0000) >> 16
-    bgGreen = (inputParams.accentColor & 0x00ff00) >> 8
-    bgBlue = (inputParams.accentColor & 0x0000ff)
+    bgRed = (inputParams.bgColor & 0xff0000) >> 16
+    bgGreen = (inputParams.bgColor & 0x00ff00) >> 8
+    bgBlue = (inputParams.bgColor & 0x0000ff)
 
     red = int(blend(red, bgRed, scaleFactor))
     green = int(blend(green, bgGreen, scaleFactor))
     blue = int(blend(blue, bgBlue, scaleFactor))
 
-    ledOut.finalColor = (red << 16) + (green << 8) + blue
+    ledOut.color = (red << 16) + (green << 8) + blue
 
 
 def basePoint(ledOut: LedOut, inputParams: InputParams):
 
-    red = (inputParams.baseColor & 0xff0000) >> 16
-    green = (inputParams.baseColor & 0x00ff00) >> 8
-    blue = inputParams.baseColor & 0x0000ff
+    red = (inputParams.color & 0xff0000) >> 16
+    green = (inputParams.color & 0x00ff00) >> 8
+    blue = inputParams.color & 0x0000ff
 
-    ledDist = distance(inputParams.baseLocation_um, ledOut.position_um)
-    maxDist = mm2um(60)
+    ledDist = distance(inputParams.baseLocation_mm, ledOut.position_mm)
+    maxDist = 60
 
     if ledOut.index == 45:
         pass
 
-    ledOut.finalColor = 0
+    ledOut.color = 0
     if ledDist < maxDist:
-        ledOut.finalColor = inputParams.baseColor
+        ledOut.color = inputParams.color

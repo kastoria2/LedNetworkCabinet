@@ -49,10 +49,10 @@ Rectangle {
                     return Qt.rgba(red / 256.0, green/256.0, blue/256.0, 1.0);
                 }
 
-                color: rgbToQtColor(modelData.finalColor)
+                color: rgbToQtColor(modelData.color)
 
-                x: (modelData.position_um[0]/1000 * hexpanel.widthScale) - width/2
-                y: (modelData.position_um[1]/1000 * hexpanel.widthScale) - height/2
+                x: (modelData.position_mm[0] * hexpanel.widthScale) - width/2
+                y: (modelData.position_mm[1] * hexpanel.widthScale) - height/2
 
                 width: 10
                 height: 10
