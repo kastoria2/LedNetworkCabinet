@@ -6,7 +6,7 @@ from typing import List
 from PySide2.QtCore import QObject, Property, Signal, Slot
 
 from .animations import initAnimation, updateAnimation, LedOut
-from .animations import static, breath, indexBreath, radiate, basePoint
+from .animations import StaticAnimation, BreathAnimation, RadiateAnimation, BasePointAnimation
 
 
 class Hexagon(QObject):
@@ -107,7 +107,7 @@ class HexPanel(QObject):
 
         self.ledStrip = self.generateLedStrip()
 
-        initAnimation(radiate)
+        initAnimation(RadiateAnimation())
 
     @Slot(result=float)
     def width(self):

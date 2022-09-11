@@ -87,12 +87,20 @@ class InputParams(object):
         # value.  Sin waves could adjust period based on this.
         self.speed = 128
 
+class Animation():
+
+    def __init__(self):
+        pass
+
+    def updateLed(self, inputParams: InputParams, ledOut: LedOut):
+        ledOut.color = inputParams.color
+
 
 GLOBAL_INPUT_PARAMS = InputParams()
-GLOBAL_ANIMATION_METHOD = None
+GLOBAL_ANIMATION = None
 
 
-def initAnimation(animationMethod, currentTime_ms: int = None):
+def initAnimation(animation: Animation, currentTime_ms: int = None):
 
     if currentTime_ms is None:
         currentTime_ms = int(time.time()*1000)
@@ -104,8 +112,8 @@ def initAnimation(animationMethod, currentTime_ms: int = None):
     GLOBAL_INPUT_PARAMS.bgColor = 0x00ff00
     GLOBAL_INPUT_PARAMS.baseLocation_mm = [625 / 2, 736 / 2]
 
-    global GLOBAL_ANIMATION_METHOD
-    GLOBAL_ANIMATION_METHOD = animationMethod
+    global GLOBAL_ANIMATION
+    GLOBAL_ANIMATION = animation
 
 
 def updateAnimation(ledStrip: List[LedOut], currentTime_ms: int = None):
@@ -120,55 +128,59 @@ def updateAnimation(ledStrip: List[LedOut], currentTime_ms: int = None):
     GLOBAL_INPUT_PARAMS.deltaTime_ms = currentTime_ms - GLOBAL_INPUT_PARAMS.currentTime_ms
     GLOBAL_INPUT_PARAMS.currentTime_ms = currentTime_ms
 
-    global GLOBAL_ANIMATION_METHOD
+    global GLOBAL_ANIMATION
 
     for led in ledStrip:
-        GLOBAL_ANIMATION_METHOD(led, GLOBAL_INPUT_PARAMS)
+        GLOBAL_ANIMATION.updateLed(GLOBAL_INPUT_PARAMS, led)
 
 
-def static(ledOut: LedOut, inputParams: InputParams):
-    '''
-    'Animation' that just displays a single, static color.
-    '''
+class StaticAnimation(Animation):
 
-    ledOut.color = inputParams.color
+    def updateLed(self, inputParams: InputParams, ledOut: LedOut):
+        '''
+        'Animation' that just displays a single, static color.
+        '''
 
-
-def breath(ledOut: LedOut, inputParams: InputParams):
-
-    CYCLE_PERIOD = 10000
-
-    # Max period is 5s for a breath cycle.
-    period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
-
-    cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
-
-    absPercentage = (abs((period/2.0) - cycleTime) / period) * 2
-
-    red = (inputParams.color & 0xff0000) >> 16
-    green = (inputParams.color & 0x00ff00) >> 8
-    blue = inputParams.color & 0x0000ff
-
-    # print(f"period: {period}, cycleTime: {cycleTime}, absPercentage: {absPercentage}, red: {red}, green: {green}, blue: {blue}")
-
-    red = int(red * absPercentage)
-    green = int(green * absPercentage)
-    blue = int(blue * absPercentage)
-
-    ledOut.color = (red << 16) + (green << 8) + blue
-
-
-def indexBreath(ledOut: LedOut, inputParams: InputParams):
-    CYCLE_PERIOD = 20000
-
-    period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
-    cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
-    absPercentage = (cycleTime / period)
-
-    if (ledOut.index / 98.0) <= absPercentage:
         ledOut.color = inputParams.color
-    else:
-        ledOut.color = 0
+
+class BreathAnimation(Animation):
+
+    def updateLed(self, inputParams: InputParams, ledOut: LedOut):
+
+        CYCLE_PERIOD = 10000
+
+        # Max period is 5s for a breath cycle.
+        period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
+
+        cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
+
+        absPercentage = (abs((period/2.0) - cycleTime) / period) * 2
+
+        red = (inputParams.color & 0xff0000) >> 16
+        green = (inputParams.color & 0x00ff00) >> 8
+        blue = inputParams.color & 0x0000ff
+
+        # print(f"period: {period}, cycleTime: {cycleTime}, absPercentage: {absPercentage}, red: {red}, green: {green}, blue: {blue}")
+
+        red = int(red * absPercentage)
+        green = int(green * absPercentage)
+        blue = int(blue * absPercentage)
+
+        ledOut.color = (red << 16) + (green << 8) + blue
+
+class IndexBreath(Animation):
+
+    def updateLed(self, inputParams: InputParams, ledOut: LedOut):
+        CYCLE_PERIOD = 20000
+
+        period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
+        cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
+        absPercentage = (cycleTime / period)
+
+        if (ledOut.index / 98.0) <= absPercentage:
+            ledOut.color = inputParams.color
+        else:
+            ledOut.color = 0
 
 
 def distance(v1, v2):
@@ -189,47 +201,49 @@ def clamp(value, lower, upper):
 
     return value
 
+class RadiateAnimation(Animation):
 
-def radiate(ledOut: LedOut, inputParams: InputParams):
-    CYCLE_PERIOD = 5000
+    def updateLed(self, inputParams: InputParams, ledOut: LedOut):
+        CYCLE_PERIOD = 5000
 
-    period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
-    cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
-    absPercentage = (cycleTime / period)
+        period = int(CYCLE_PERIOD * (inputParams.speed / 256.0))
+        cycleTime = (inputParams.currentTime_ms - inputParams.startTime_ms) % period
+        absPercentage = (cycleTime / period)
 
-    maxDist = distance([0, 0], [625, 736])
-    ledDist = distance(inputParams.baseLocation_mm, ledOut.position_mm)
-    ledPercent = ledDist / maxDist
+        maxDist = distance([0, 0], [625, 736])
+        ledDist = distance(inputParams.baseLocation_mm, ledOut.position_mm)
+        ledPercent = ledDist / maxDist
 
-    red = (inputParams.color & 0xff0000) >> 16
-    green = (inputParams.color & 0x00ff00) >> 8
-    blue = inputParams.color & 0x0000ff
+        red = (inputParams.color & 0xff0000) >> 16
+        green = (inputParams.color & 0x00ff00) >> 8
+        blue = inputParams.color & 0x0000ff
 
-    scaleFactor = clamp((1 - math.fabs(absPercentage - ledPercent) * 10), 0, 1.0)
+        scaleFactor = clamp((1 - math.fabs(absPercentage - ledPercent) * 10), 0, 1.0)
 
-    bgRed = (inputParams.bgColor & 0xff0000) >> 16
-    bgGreen = (inputParams.bgColor & 0x00ff00) >> 8
-    bgBlue = (inputParams.bgColor & 0x0000ff)
+        bgRed = (inputParams.bgColor & 0xff0000) >> 16
+        bgGreen = (inputParams.bgColor & 0x00ff00) >> 8
+        bgBlue = (inputParams.bgColor & 0x0000ff)
 
-    red = int(blend(red, bgRed, scaleFactor))
-    green = int(blend(green, bgGreen, scaleFactor))
-    blue = int(blend(blue, bgBlue, scaleFactor))
+        red = int(blend(red, bgRed, scaleFactor))
+        green = int(blend(green, bgGreen, scaleFactor))
+        blue = int(blend(blue, bgBlue, scaleFactor))
 
-    ledOut.color = (red << 16) + (green << 8) + blue
+        ledOut.color = (red << 16) + (green << 8) + blue
 
+class BasePointAnimation(Animation):
 
-def basePoint(ledOut: LedOut, inputParams: InputParams):
+    def updateLed(self, inputParams: InputParams, ledOut: LedOut):
 
-    red = (inputParams.color & 0xff0000) >> 16
-    green = (inputParams.color & 0x00ff00) >> 8
-    blue = inputParams.color & 0x0000ff
+        red = (inputParams.color & 0xff0000) >> 16
+        green = (inputParams.color & 0x00ff00) >> 8
+        blue = inputParams.color & 0x0000ff
 
-    ledDist = distance(inputParams.baseLocation_mm, ledOut.position_mm)
-    maxDist = 60
+        ledDist = distance(inputParams.baseLocation_mm, ledOut.position_mm)
+        maxDist = 60
 
-    if ledOut.index == 45:
-        pass
+        if ledOut.index == 45:
+            pass
 
-    ledOut.color = 0
-    if ledDist < maxDist:
-        ledOut.color = inputParams.color
+        ledOut.color = 0
+        if ledDist < maxDist:
+            ledOut.color = inputParams.color
