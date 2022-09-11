@@ -9,7 +9,7 @@ class StaticAnimation : public Animation
 {
 public:
   StaticAnimation(HexPanel& hexPanel);
-  virtual void updateLed(const InputParams& inputParams, LedOut& ledOut);
+  virtual void update(const InputParams& inputParams);
 };
 
 #endif // #ifndef __STATIC_ANIMATION_H__

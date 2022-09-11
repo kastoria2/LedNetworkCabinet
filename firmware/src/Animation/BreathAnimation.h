@@ -9,7 +9,7 @@ class BreathAnimation : public Animation
 {
 public:
   BreathAnimation(HexPanel& hexPanel);
-  virtual void updateLed(const InputParams& inputParams, LedOut& ledOut);
+  virtual void update(const InputParams& inputParams);
 };
 
 #endif // #ifndef __BREATH_ANIMATION_H__

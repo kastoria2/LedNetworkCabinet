@@ -4,7 +4,11 @@
 StaticAnimation::StaticAnimation(HexPanel& hexPanel) : Animation("Static", hexPanel)
 {}
 
-void StaticAnimation::updateLed(const InputParams& inputParams, LedOut& ledOut)
+void StaticAnimation::update(const InputParams& inputParams)
 {
-  ledOut.color = inputParams.color;
+  for(int i = 0; i < this->hexPanel.getLedCount(); i++)
+  {
+    LedOut& ledOut = this->hexPanel.getLedStrip()[i];
+    ledOut.color = inputParams.color;
+  }
 }

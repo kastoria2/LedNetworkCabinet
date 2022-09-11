@@ -16,12 +16,15 @@ public:
 
   const String& getDisplayName();
 
-  virtual void updateLed(const InputParams& inputParams, LedOut& ledOut) = 0;
+  virtual void update(const InputParams& inputParams) = 0;
   virtual void toJson(JsonDocument& doc);
+
+protected:
+
+  HexPanel& hexPanel;
 
 private:
   String displayName;
-  HexPanel& hexPanel;
 };
 
 #endif  // #ifndef __ANIMATION_H__

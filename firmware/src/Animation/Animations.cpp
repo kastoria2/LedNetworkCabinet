@@ -68,10 +68,7 @@ void Animations::update()
   inputParams.deltaTime_ms = currentMillis - inputParams.currentTime_ms;
   inputParams.currentTime_ms = currentMillis;
 
-  for (int i = 0; i < ledCount; i++)
-  {
-    currentAnimation->updateLed(inputParams, this->hexPanel.getLedStrip()[i]);
-  }
+  currentAnimation->update(inputParams);
 }
 
 // float origin[] = {0, 0};

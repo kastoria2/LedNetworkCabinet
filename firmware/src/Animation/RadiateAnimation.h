@@ -9,7 +9,7 @@ class RadiateAnimation : public Animation
 {
 public:
   RadiateAnimation(HexPanel& hexPanel);
-  virtual void updateLed(const InputParams& inputParams, LedOut& ledOut);
+  virtual void update(const InputParams& inputParams);
 
 private:
 };
