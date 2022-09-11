@@ -1,6 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #include "LedLocations.h"
+#include "HexPanel.h"
 #include "Animation/Animations.h"
 
 #include "WebService.h"
@@ -12,8 +13,9 @@
 #define BRIGHTNESS 16
 #define PIN 6
 
+HexPanel hexPanel(625, 736);
 NeoPixels pixels(NUM_LEDS, PIN, NEO_GRB + NEO_KHZ800);
-Animations animations(leds, NUM_LEDS);
+Animations animations(hexPanel, NUM_LEDS);
 
 void setup() {
 
@@ -37,7 +39,7 @@ void loop() {
   
   for(int i = 0; i < NUM_LEDS; i++)
   {
-    pixels.setPixelColor(i, leds[i].color);
+    pixels.setPixelColor(i, hexPanel.getLedStrip()[i].color);
   }
   pixels.show();
 

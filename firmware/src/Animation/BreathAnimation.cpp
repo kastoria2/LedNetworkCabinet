@@ -1,6 +1,7 @@
 #include "BreathAnimation.h"
+#include "HexPanel.h"
 
-BreathAnimation::BreathAnimation() : Animation("Breath")
+BreathAnimation::BreathAnimation(HexPanel& hexPanel) : Animation("Breath", hexPanel)
 {}
 
 void BreathAnimation::updateLed(const InputParams& inputParams, LedOut& ledOut)

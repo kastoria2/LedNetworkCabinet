@@ -3,10 +3,12 @@
 
 #include "Animation.h"
 
+class HexPanel;
+
 class BreathAnimation : public Animation
 {
 public:
-  BreathAnimation();
+  BreathAnimation(HexPanel& hexPanel);
   virtual void updateLed(const InputParams& inputParams, LedOut& ledOut);
 };
 

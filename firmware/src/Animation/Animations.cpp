@@ -4,16 +4,15 @@
 #include "BreathAnimation.h"
 #include "RadiateAnimation.h"
 
+#include "HexPanel.h"
+
 #include "utils.h"
 
-Animations::Animations(LedOut leds[], int ledCount)
+Animations::Animations(HexPanel& hexPanel, int ledCount) : hexPanel(hexPanel), ledCount(ledCount)
 {
-  this->leds = leds;
-  this->ledCount = ledCount;
-
-  animations[0] = new StaticAnimation();
-  animations[1] = new BreathAnimation();
-  animations[2] = new RadiateAnimation();
+  animations[0] = new StaticAnimation(hexPanel);
+  animations[1] = new BreathAnimation(hexPanel);
+  animations[2] = new RadiateAnimation(hexPanel);
 
   currentAnimation = animations[2];
 }
@@ -71,7 +70,7 @@ void Animations::update()
 
   for (int i = 0; i < ledCount; i++)
   {
-    currentAnimation->updateLed(inputParams, leds[i]);
+    currentAnimation->updateLed(inputParams, this->hexPanel.getLedStrip()[i]);
   }
 }
 

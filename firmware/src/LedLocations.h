@@ -15,6 +15,5 @@ struct LedOut {
 };
 
 #define NUM_LEDS 98
-extern LedOut leds[NUM_LEDS];
 
 #endif // __LED_LOCATIONS_H__

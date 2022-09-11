@@ -11,11 +11,13 @@
 
 #define ANIMATION_COUNT 3
 
+class HexPanel;
+
 class Animations
 {
 public:
 
-  Animations(LedOut leds[], int ledCount);
+  Animations(HexPanel& hexPanel, int ledCount);
 
   InputParams& getInputParams();
 
@@ -30,7 +32,7 @@ public:
 private:
 
   InputParams inputParams;
-  LedOut* leds;
+  HexPanel& hexPanel;
   int ledCount;
 
   Animation* currentAnimation;

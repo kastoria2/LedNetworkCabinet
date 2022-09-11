@@ -3,10 +3,12 @@
 
 #include "Animation.h"
 
+class HexPanel;
+
 class StaticAnimation : public Animation
 {
 public:
-  StaticAnimation();
+  StaticAnimation(HexPanel& hexPanel);
   virtual void updateLed(const InputParams& inputParams, LedOut& ledOut);
 };
 

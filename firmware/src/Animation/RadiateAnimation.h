@@ -3,10 +3,12 @@
 
 #include "Animation.h"
 
+class HexPanel;
+
 class RadiateAnimation : public Animation
 {
 public:
-  RadiateAnimation();
+  RadiateAnimation(HexPanel& hexPanel);
   virtual void updateLed(const InputParams& inputParams, LedOut& ledOut);
 
 private:

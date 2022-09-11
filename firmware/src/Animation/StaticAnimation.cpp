@@ -1,6 +1,7 @@
 #include "StaticAnimation.h"
+#include "HexPanel.h"
 
-StaticAnimation::StaticAnimation() : Animation("Static")
+StaticAnimation::StaticAnimation(HexPanel& hexPanel) : Animation("Static", hexPanel)
 {}
 
 void StaticAnimation::updateLed(const InputParams& inputParams, LedOut& ledOut)

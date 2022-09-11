@@ -1,4 +1,5 @@
 #include "RadiateAnimation.h"
+#include "HexPanel.h"
 
 #include "utils.h"
 
@@ -7,7 +8,7 @@ float origin[] = {0, 0};
 float lowerRight[] = {625, 736};
 float maxDist = distance(origin, lowerRight);
 
-RadiateAnimation::RadiateAnimation() : Animation("Radiate")
+RadiateAnimation::RadiateAnimation(HexPanel& hexPanel) : Animation("Radiate", hexPanel)
 {}
 
 void RadiateAnimation::updateLed(const InputParams& inputParams, LedOut& ledOut)
