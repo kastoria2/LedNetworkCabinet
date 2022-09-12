@@ -3,6 +3,7 @@
 #include "StaticAnimation.h"
 #include "BreathAnimation.h"
 #include "RadiateAnimation.h"
+#include "TwinkleAnimation.h"
 
 #include "HexPanel.h"
 
@@ -13,8 +14,9 @@ Animations::Animations(HexPanel& hexPanel, int ledCount) : hexPanel(hexPanel), l
   animations[0] = new StaticAnimation(hexPanel);
   animations[1] = new BreathAnimation(hexPanel);
   animations[2] = new RadiateAnimation(hexPanel);
+  animations[3] = new TwinkleAnimation(hexPanel);
 
-  currentAnimation = animations[2];
+  currentAnimation = animations[0];
 }
 
 InputParams& Animations::getInputParams()

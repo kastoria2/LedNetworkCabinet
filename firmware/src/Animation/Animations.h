@@ -9,7 +9,7 @@
 
 #include "Animation.h"
 
-#define ANIMATION_COUNT 3
+#define ANIMATION_COUNT 4
 
 class HexPanel;
 
